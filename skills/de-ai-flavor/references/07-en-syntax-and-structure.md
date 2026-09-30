@@ -4,6 +4,7 @@
 > **适用范围（重要）**：本清单来自**英文对照语料与英文社区样本**，仅适用于英文文本。**不得顺推至中文**——中文侧见 `references/05-zh-syntax-and-structure.md`，其结论同样不得推回本清单。两侧是各自独立成立的证据，不是互为译文。
 > **来源**：S1 = Reinhart et al., *Do LLMs write like humans? Variation in grammatical and rhetorical styles*, PNAS 122(8) e2422455122 (2025)；arXiv:2410.16107（HAP-E 平行语料 33.5M 词 / 6 体裁 / 8 来源，Biber 67 特征逐项检验）。**S1′ = 本地独立复算**（2026-09-30，取用 S1 公开的 Biber 特征计数 `hf/3792`，人类基准 = chunk-2，配对 n=8,290，6 模型 × 6 体裁；五个关键倍数复现误差 <1%）。S4 = Wikipedia:Signs of AI writing（WikiProject AI Cleanup，社区共识）。S1 的全文本、特征、解析与复现代码公开（`hf/3770`、`hf/3792`、`hf/3793`、`OSF 7MRQN`）。
 > **证据等级**：第 1–4 条 🟢 同行评审（倍数为 **GPT-4o**，已本地复算）；第 5 条 🟢（S1′ 复算：`be` 作主动词 0.63× / d=−0.83）；第 6 条 🟢（Kobak 互证）；第 7–10 条 🟡 社区共识。
+> **特征口径（2026-09-30 核对）**：本文件的倍数对应 Biber 特征编号（`f_14` / `f_25` / `f_29` / `f_64` 等），定义以 S1 作者开源的 **`pseudobibeR`**（R 包，MIT，CRAN；S1 数据页确认即此包所算）为准，已**逐条比对源码**而非注释。核出一处结构错配：第 3 条原写「名词性 `That … is …` 从句作主句主语」，而 `f_29` 实为 **that 关系从句**（`the dog [that bit me]`），已更正。本地以 Python + spaCy 复刻该口径，并在 HAP-E 全文（人类 chunk-2 vs gpt-4o，n=960）上与官方 Biber 计数**逐文档比对**：六项句法特征 r = 0.975–0.997，比值几乎重合（`f_25` 5.09 vs 官方 5.08）——口径等价，可供我们自己的语料使用。
 > **倍数怎么用（重要）**：下表倍数是 **GPT-4o 单点值**，跨 6 模型差异极大（例：现在分词从句 0.94–5.27）。**只作方向性依据，不是阈值**——判据始终是触发标记 + 密度。
 > **配套**：反向保护清单（看着像 AI 味、实测站不住、**不得据此改写**）见 `references/08-en-do-not-change.md`——**先读它**。
 
@@ -39,14 +40,18 @@ gpt-4o                5.27×
 
 倍数与 d 值来自 S1（并经 S1′ 本地复算校验），均为 **GPT-4o vs 人类的比值**。**这些数字只作方向性依据，不是判据阈值**——判据始终是下面的**触发标记 + 密度**。跨模型差异见文件头的「倍数怎么用」。
 
-### 1. 句尾现在分词"意义手势"（5.3× / d=1.38）🟢
+### 1. 现在分词状语从句（5.3× / d=1.38）🟢
 
-句子结尾挂一个 `, -ing` 短语，不补充新信息，只给句子加一层"意义升华"。英文侧证据最强的一项，也最容易被忽略——它读起来很顺，但删掉后信息不减。
+挂一个 `-ing` 短语给句子加一层"意义升华"，删掉后信息不减。英文侧证据最强的一项，也最容易被忽略——它读起来很顺。
 
-- **触发标记**：句末出现 `, highlighting / underscoring / emphasizing / reflecting / demonstrating / showcasing / ensuring / allowing for / paving the way for` + 名词短语，且删掉后句子信息不减。
+**位置**：S4 明确指出最常见的位置是**句尾**（"attaching a present participle ('-ing') phrase at the end of sentences"，并引 S1 为据）。Biber 特征 `f_25` 的机器判据是**紧随标点之后的 `VBG` 状语 / 补语从句**（`advcl` / `ccomp`）——该判据同时涵盖句首（`[Stuffing his mouth with cookies], Joe ran out.`）与句中，因此**不要只查句尾**。
+
+- **触发标记**：`highlighting / underscoring / emphasizing / reflecting / demonstrating / showcasing / ensuring / allowing for / paving the way for` + 名词短语，位于句尾（最常见）、句首或句中，且删掉后句子信息不减。
 - **改法**：删掉该短语。若它确实带了信息，改成独立句子并把内容说具体（不得新增原文没有的信息）。
 - **不改**：分词短语确实承担信息（交代结果、原因、方式）时；技术文档里描述伴随动作的常规写法。
 - ❌ The update ships next week, highlighting our commitment to reliability.
+  ✅ The update ships next week.
+- ❌ Highlighting our commitment to reliability, the update ships next week.
   ✅ The update ships next week.
 - ❌ The pilot cut handling time by half, underscoring the value of automation.
   ✅ The pilot cut handling time by half.
@@ -55,25 +60,27 @@ gpt-4o                5.27×
 
 把动作写成抽象名词，动词被挤掉。单看一句不算问题，成段出现就是机器骨架。
 
-- **触发标记**：`the implementation of` / `the utilization of` / `the optimization of` / `the facilitation of` / `the enhancement of` + 名词；或一句里出现两个以上 `-tion / -ment / -ance` 抽象名词。
+- **触发标记**：`the implementation of` / `the utilization of` / `the optimization of` / `the facilitation of` / `the enhancement of` + 名词；或一句里出现两个以上 `-tion / -ment / -ness / -ity` 抽象名词。`f_14` 的机器判据即后缀 `-tion(s) / -ment(s) / -ness(es) / -ity|ities` 加词性 `NOUN`，另有停用词表排除。
 - **改法**：恢复动词。`the implementation of the policy` → `implementing the policy`。
 - **不改**：该名词是领域术语且无自然动词形式（`authentication`、`compliance`）；标题、字段名、代码标识符。
 - ❌ The optimization of the deployment process resulted in the reduction of downtime.
   ✅ We optimized the deployment process, and downtime dropped.
 
-### 3. 作主语的 that 从句（2.6× / d=0.77）🟢
+### 3. that 关系从句作从句主语（2.6× / d=0.77）🟢
 
-句子不从内容开始，而从"某个事实"这个包装开始，尤见于段落起首。
+名词短语后面挂 `that` 引导的关系从句，`that` 在从句里作主语，把主语拉长、真正的谓语被推后——信息挤进名词短语的一种表现。
 
-- **触发标记**：段首或句首为 `That … is …` / `It is … that …`，而从句里的内容本身就是论点。
-- **改法**：把从句的内容提为主句。`That the tool is popular does not mean it fits our workflow` → `Popularity does not mean it fits our workflow`。
-- **不改**：论述对象**确实是"某个事实本身"**（如逻辑推理、合规判断）时；`It is important that…` 属词汇层空话，走 `references/02-banned-words-and-patterns.md`。
-- ❌ That the tool is popular does not mean it fits our workflow.
-  ✅ Popularity does not mean it fits our workflow.
+**先分清结构**：Biber 特征 `f_29` 的定义是 **that 关系从句**（`the dog [that bit me]`：`that` 前接名词性词、`that` 自身充当 `nsubj`）。它**不是** `That … is …` 那种名词性从句作主句主语——后者的 `that` 是 `mark`，不计入本特征。别把两者混为一谈；`It is important that…` 之类属词汇层空话，走 `references/02-banned-words-and-patterns.md`。
+
+- **触发标记**：`the X that [动词] …` 结构密集出现，尤其当**句子主语被关系从句拉长、谓语被推后**（`The change that reduced the error rate most was …`）。
+- **改法**：把关系从句拆成独立句，或把从句内容提到主位。`The change that reduced the error rate most was the retry cap` → `The retry cap reduced the error rate most`。
+- **不改**：关系从句是不可省的限定，用来区分多个对象（`the clause that applies to EU customers`）；定义、法条、字段名。
+- ❌ The change that reduced the error rate most was the retry cap.
+  ✅ The retry cap reduced the error rate most.
 
 ### 4. 短语并列（1.9× / d=0.81）🟢
 
-名词或形容词成对并置，两侧信息往往重叠，实际只占一格的量。
+同类短语成对并置（`f_64` 判据：名词、形容词、动词、副词四类中任一类以 `and` 相连），两侧信息往往重叠，实际只占一格的量。
 
 - **触发标记**：`both X and Y` / `X and Y` 式同义堆叠（`thorough, detailed, and comprehensive`）在全文多次出现。
 - **改法**：删掉**无信息**的那一侧，保留信息量最大的一项。不得为"读起来更完整"补新词。

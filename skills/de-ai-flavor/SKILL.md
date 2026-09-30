@@ -3,7 +3,7 @@ name: de-ai-flavor
 description: Remove "AI flavor" (AI 味儿) from LLM outputs in both conversational replies and document generation, for Chinese AND English text. Covers word-level banned lists plus parallel Chinese and English discourse/syntax rules, per-language do-not-change protection lists, and format / markup-artifact cleanup. Use when the user complains about AI-sounding text, wants human-like writing, or asks to humanize / de-AI-flavored content in either language.
 description_zh: "去除 LLM 输出的 AI 味儿（中文+英文）：覆盖对话与文档生成，含中英双语禁词表、中文篇章/句法层规则（11 项）、英文篇章/句法层规则（10 项）、中英各自的反向保护清单、格式与残留标记清扫、常驻人设 system 片段、文档模板、保真护栏（白名单默认/实词溯源/情态条件保护）"
 description_en: "Strip AI-sounding tone from LLM output in chat and documents, in Chinese and English, with bilingual banned-word lists, parallel Chinese and English discourse/syntax rules, per-language do-not-change lists, format and markup-artifact cleanup, persona system snippets, doc templates, and whitelist-first fidelity guardrails."
-version: 1.5.1
+version: 1.5.2
 status: stable
 license: MIT
 allowed-tools: Read,Write,Edit,Grep
@@ -42,7 +42,7 @@ AI 味儿不是语法错误，而是模型在"最大化先验概率"下输出的
 |---|---|---|---|
 | **词汇层** | 套话、确定语气空转词、抽象大词、助手腔（中英） | `references/02-banned-words-and-patterns.md` | 中文 🟡 经验共识 / 英文 ⚪ 待验证 |
 | **篇章 / 句法层（中文）** | 段首回指、冒号空转、拟人喻体、翻案腔等 11 项 | `references/05-zh-syntax-and-structure.md` | 🟢 语料验证（待独立验证） |
-| **篇章 / 句法层（英文）** | 句尾分词、名词化、回避系词、否定平行等 10 项 | `references/07-en-syntax-and-structure.md` | 🟢 同行评审 + 🟡 社区共识 |
+| **篇章 / 句法层（英文）** | 分词状语从句、名词化、回避系词、否定平行等 10 项 | `references/07-en-syntax-and-structure.md` | 🟢 同行评审 + 🟡 社区共识 |
 | **格式 / 残留标记层** | 机器残留标记、粗体滥用、标题层级、弯引号等 | `references/09-format-and-artifacts.md` | 🟢 残留标记零假阳性 |
 
 > **两侧结论不同，不可互推**：中文是"**篇章层独强、词汇层痕迹弱**"；英文是"**词汇层与句法层同时很强**"（词汇倍数达 100×+，句法 2–5× 且效应量大，d 最高 1.38）。所以两套篇章层文件**各自独立成立**，不是互为译文——英文文本不得套中文清单，反之亦然。
@@ -109,7 +109,7 @@ AI 味儿不是语法错误，而是模型在"最大化先验概率"下输出的
 
 - 是否出现套话开场 / 收尾、助手腔客套、确定语气空转词？→ 有则重写。
 - **中文**文本是否过了篇章层（段首零回指 / 冒号空转 / 拟人喻体 / 翻案腔 / 破折号 / 翻译腔等 11 项）？→ 未过则回看 `references/05-zh-syntax-and-structure.md`。
-- **英文**文本是否过了篇章层（句尾分词 / 名词化 / 回避系词 / 空转意义强调 / 否定平行 / 提纲式结尾 / 模糊归属 / 三段式密度等 10 项）？→ 未过则回看 `references/07-en-syntax-and-structure.md`。
+- **英文**文本是否过了篇章层（分词状语从句 / 名词化 / that 关系从句作主语 / 回避系词 / 空转意义强调 / 否定平行 / 提纲式结尾 / 模糊归属 / 三段式密度等 10 项）？→ 未过则回看 `references/07-en-syntax-and-structure.md`。
 - 是否误改了**对应语言的反向保护清单**里的项（中文：问句 / 比喻 / 句内排比 / 被动句 / 正文连接词；英文：简单 is-has / 普通动词 / 最高级 / hedge / 被动 / 脏话 / 词汇多样性）？→ 改了则**撤回**。
 - **交付前是否扫过格式与残留标记**（`[cite: 1]` / `oai_citation` / `turn0search0` / 粗体滥用 / 标题层级 / 弯引号）？→ 未扫则补 `references/09-format-and-artifacts.md`。
 - 是否用**同义词机械替换**了命中项（如 `delve` → `look into`）？→ 是则撤销——那是新痕迹，不是去味。
@@ -123,5 +123,6 @@ AI 味儿不是语法错误，而是模型在"最大化先验概率"下输出的
 - 本 skill 为独立实现，未复制第三方源码。v1.2.0「保真护栏」的编辑哲学借鉴自开源项目 **shuorenhua（说人话，MIT License）**；v1.4.0 新增的**中文篇章 / 句法层规则**与**反向保护清单**改写自开源项目 **`lieflat-less-ai-tone`（MIT License）**，其规则基于 283 万字对照语料统计（**证据等级：高质量外部证据 · 待独立验证**）。评测数据以原作者自述为准。
 - v1.5.0 新增的**英文篇章 / 句法层规则**、**英文反向保护清单**与**格式 / 残留标记清扫**，依据 **Reinhart et al., "Do LLMs write like humans? Variation in grammatical and rhetorical styles", PNAS 122(8) e2422455122 (2025)**（HAP-E 平行语料 33.5M 词，数据与复现代码公开：`hf/3770`、`hf/3792`、`OSF 7MRQN`）与 **Wikipedia:Signs of AI writing**（WikiProject AI Cleanup，社区共识）。同轮按实测**修正**三处既有英文规则：被动语态摘出、hedge 降级为提示、判据改为密度。
 - v1.5.1 对英文侧做**本地独立复算**：取用上条公开的 Biber 特征计数（`hf/3792`），以 `chunk-2` 为人类基准、配对 n=8,290（6 模型 × 6 体裁），复现论文五个关键倍数（误差 <1%、d 值一致），并从数据上确认「AI 味来自指令微调」——instruct/base 偏离比 **1.71×（8B）/ 1.80×（70B）**，基座模型最接近人类。据此把 `references/07-en-syntax-and-structure.md` 第 5 条与 `references/08-en-do-not-change.md` 第 4 条升级为 🟢 并补入量化依据，同时为 `references/08-en-do-not-change.md` 第 2、6、8 条补上模型依赖与反例边界。**未改动任何规则的触发条件或改法方向**（只提证据、不动判据）。
+- v1.5.2 对英文侧做一次**口径核对**：以 S1 作者开源的 `pseudobibeR`（R 包，MIT，CRAN；S1 数据页确认其 Biber 特征即由此包算出）**逐条比对源码**（不读注释），据此更正 `references/07-en-syntax-and-structure.md`：① 第 3 条原写「名词性 `That … is …` 从句作主句主语」，而 `f_29` 实为 **that 关系从句**（`the dog [that bit me]`，`that` 前接名词且自身作 `nsubj`）——**结构错配，已更正**；② 第 2 条后缀由 `-ance` 更正为实际的 `-ness / -ity`；③ 第 4 条并列类别补全为名词 / 形容词 / 动词 / 副词四类；④ 第 1 条补上 `f_25` 的真实判据（**紧随标点的 `VBG` 状语 / 补语从句**，含句首与句中，非仅句尾）。核对同时确认：维基「Superficial analyses」节独立引 S1 支持「句尾 `-ing` 短语」这一观察。
 - **已知局限**：HAP-E 的 6 体裁（学术 / 博客 / 小说 / 新闻 / 口语 / 影视剧本）**不含商务邮件、IT 方案与汇报、幻灯片**，其倍数只作方向性依据，**不能当本 skill 场景的判据阈值**——英文侧待自建语料（P2/B）补齐。中文侧语料未公开、不可核验，其定量结论仍**未经独立复算**。
 - 许可证：MIT。作者 Stanley Hao。
