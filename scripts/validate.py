@@ -144,7 +144,7 @@ def main():
                 print("        - %s" % p)
         else:
             dlen = len(get_field(fm, "description")) if fm else 0
-            ver = nested_field(fm, "version") or "-"
+            ver = nested_field(fm, "version") or get_field(fm, "version") or "-"
             print("PASS  %-28s %d file(s), description %d/%d chars, version %s"
                   % (d.name, n_files, dlen, MAX_DESC, ver))
 

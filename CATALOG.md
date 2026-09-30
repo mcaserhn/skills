@@ -5,7 +5,7 @@
 
 | Skill | Description | Version | Status | Files |
 |---|---|---|---|---|
-| [`de-ai-flavor`](skills/de-ai-flavor/) | Remove "AI flavor" (AI 味儿) from LLM outputs in both conversational replies and document generation, for Chinese AND English text. Use when the user ... | 1.2.0 | - | 1 |
+| [`de-ai-flavor`](skills/de-ai-flavor/) | Remove "AI flavor" (AI 味儿) from LLM outputs in both conversational replies and document generation, for Chinese AND English text. Use when the user ... | 1.3.0 | - | 9 |
 | [`spp-source-principle`](skills/spp-source-principle/) | Execute the Source Principle Protocol (SPP v4.0 R4.3) for human-AI collaboration. Use when the task involves load-bearing conclusions (承重结论), formal ... | - | - | 27 |
 
 Total: **2** skill(s).
