@@ -1,0 +1,145 @@
+# 篇章与句法层规则（英文）
+
+> `de-ai-flavor` 按需参考（L3）。何时加载：对**英文**文本做去味时，在词汇层禁词表（`references/02-banned-words-and-patterns.md`）之外，按本清单逐项检查句法 / 篇章痕迹。
+> **适用范围（重要）**：本清单来自**英文对照语料与英文社区样本**，仅适用于英文文本。**不得顺推至中文**——中文侧见 `references/05-zh-syntax-and-structure.md`，其结论同样不得推回本清单。两侧是各自独立成立的证据，不是互为译文。
+> **来源**：S1 = Reinhart et al., *Do LLMs write like humans? Variation in grammatical and rhetorical styles*, PNAS 122(8) e2422455122 (2025)；arXiv:2410.16107（HAP-E 平行语料 33.5M 词 / 6 体裁 / 8 来源，Biber 66 特征逐项检验）。S4 = Wikipedia:Signs of AI writing（WikiProject AI Cleanup，社区共识）。S1 的全文本、特征、解析与复现代码公开（`hf/3770`、`hf/3792`、`hf/3793`、`OSF 7MRQN`）。
+> **证据等级**：第 1–4 条 🟢 同行评审（报倍数与 Cohen's d）；第 5–10 条 🟡 社区共识，其中第 5 条另有 🟢 互证（S4 的人类特征节）。
+> **配套**：反向保护清单（看着像 AI 味、实测站不住、**不得据此改写**）见 `references/08-en-do-not-change.md`——**先读它**。
+
+## 核心判断
+
+**与中文侧不同：英文的区分力在词汇层和句法层同时很强。**
+
+| | 中文（`references/05-zh-syntax-and-structure.md`） | 英文（本文件） |
+|---|---|---|
+| 词汇层 | 痕迹**弱**——区分力集中在篇章层 | 痕迹**强**——倍数达 100×+（camaraderie 162×、tapestry 155×） |
+| 句法 / 篇章层 | **强**（R = 1.8–9.4） | **强**（2–5×，效应量 d 最高 1.38） |
+
+所以中文"篇章层独强、词汇层不必重看"的结论**不能套用到英文**——英文两层都要过。
+
+另一条与中文同向的结论：差异**来自指令微调，不来自训练语料**。它不随模型变大而缩小（70B ≈ 8B），且**基础模型最接近人类**。这解释了为什么"换个大模型"解决不了 AI 味。
+
+## 改写规则（按证据强度排序）
+
+倍数与 d 值来自 S1，均为 **GPT-4o vs 人类的比值**。**这些数字只作方向性依据，不是判据阈值**——判据始终是下面的**触发标记 + 密度**。
+
+### 1. 句尾现在分词"意义手势"（5.3× / d=1.38）🟢
+
+句子结尾挂一个 `, -ing` 短语，不补充新信息，只给句子加一层"意义升华"。英文侧证据最强的一项，也最容易被忽略——它读起来很顺，但删掉后信息不减。
+
+- **触发标记**：句末出现 `, highlighting / underscoring / emphasizing / reflecting / demonstrating / showcasing / ensuring / allowing for / paving the way for` + 名词短语，且删掉后句子信息不减。
+- **改法**：删掉该短语。若它确实带了信息，改成独立句子并把内容说具体（不得新增原文没有的信息）。
+- **不改**：分词短语确实承担信息（交代结果、原因、方式）时；技术文档里描述伴随动作的常规写法。
+- ❌ The update ships next week, highlighting our commitment to reliability.
+  ✅ The update ships next week.
+- ❌ The pilot cut handling time by half, underscoring the value of automation.
+  ✅ The pilot cut handling time by half.
+
+### 2. 名词化堆叠（2.1× / d=1.23）🟢
+
+把动作写成抽象名词，动词被挤掉。单看一句不算问题，成段出现就是机器骨架。
+
+- **触发标记**：`the implementation of` / `the utilization of` / `the optimization of` / `the facilitation of` / `the enhancement of` + 名词；或一句里出现两个以上 `-tion / -ment / -ance` 抽象名词。
+- **改法**：恢复动词。`the implementation of the policy` → `implementing the policy`。
+- **不改**：该名词是领域术语且无自然动词形式（`authentication`、`compliance`）；标题、字段名、代码标识符。
+- ❌ The optimization of the deployment process resulted in the reduction of downtime.
+  ✅ We optimized the deployment process, and downtime dropped.
+
+### 3. 作主语的 that 从句（2.6× / d=0.77）🟢
+
+句子不从内容开始，而从"某个事实"这个包装开始，尤见于段落起首。
+
+- **触发标记**：段首或句首为 `That … is …` / `It is … that …`，而从句里的内容本身就是论点。
+- **改法**：把从句的内容提为主句。`That the tool is popular does not mean it fits our workflow` → `Popularity does not mean it fits our workflow`。
+- **不改**：论述对象**确实是"某个事实本身"**（如逻辑推理、合规判断）时；`It is important that…` 属词汇层空话，走 `references/02-banned-words-and-patterns.md`。
+- ❌ That the tool is popular does not mean it fits our workflow.
+  ✅ Popularity does not mean it fits our workflow.
+
+### 4. 短语并列（1.9× / d=0.81）🟢
+
+名词或形容词成对并置，两侧信息往往重叠，实际只占一格的量。
+
+- **触发标记**：`both X and Y` / `X and Y` 式同义堆叠（`thorough, detailed, and comprehensive`）在全文多次出现。
+- **改法**：删掉**无信息**的那一侧，保留信息量最大的一项。不得为"读起来更完整"补新词。
+- **不改**：两侧都承担不同信息且不可省（`read and write access`）；法律、财务、配置项等必须完整列出的场合。
+- ❌ The report is thorough, detailed, and comprehensive.
+  ✅ The report is detailed.
+
+### 5. 回避系词（🟡 维基 ＋ 🟢 互证）
+
+用 `serves as / stands as / marks / functions as / constitutes` 代替 `is / are`，把简单判断说成"具有某种地位"。
+
+S4 的人类特征节独立佐证：人类 25 年编辑语料中，`there is a` / `it has a` 这类**简单系词短语的出现频率高于 AI 文本**——即 AI 回避的是系词本身，不只是这几个替身词。
+
+- **触发标记**：`serves as a` / `stands as a` / `marks a` / `constitutes a` + 名词，而换成 `is a` 意思完全不变。
+- **改法**：换回 `is / are`，或直接写它做了什么。
+- **不改**：`represent` 确指法律或代理意义上的"代表"；`function as` 确指"充当某功能"且有对照物时。
+- ❌ The dashboard serves as the central hub for all metrics.
+  ✅ The dashboard holds all metrics.
+
+### 6. 空转意义强调（🟡 维基 ＋ 🟢 Kobak）🟢
+
+一整句在强调"这件事很重要"，却不说重要在哪。
+
+- **触发标记**：`is a testament to` / `underscores the importance of` / `reflects a broader` / `in an evolving landscape` / `marks a key turning point` / `leaves an indelible mark` / `speaks to the`。
+- **改法**：删整句；若后文确接了具体事实，只删强调壳、保留事实。
+- **不改**：后面确实跟着具体结论或数据时——那是正常过渡，只处理空转的那半句。
+- ❌ The migration succeeded, underscoring the importance of early planning.
+  ✅ The migration succeeded.
+
+### 7. 否定平行（🟡 维基）
+
+`not just X but also Y` / `not X but Y` / `Y rather than X`——先立一个读者并没有的误解，再推翻它。与中文 `references/05-zh-syntax-and-structure.md` 第 1 条「翻案腔」同构，但**在英文侧是独立证据**，不是中文规则的翻译。
+
+- **触发标记**：全文出现 ≥2 次，或作为段首句 / 结尾句出现。清单只是举例，同一动作换任何字面都要处理。
+- **改法**：直接从正面下判断——先给判断，再给依据。
+- **不改**：单次出现且确在区分两个真实选项（`read-only rather than read-write`）；技术对照说明。
+- ❌ This isn't just a migration, it's a rethink of the architecture.
+  ✅ The migration also changes the architecture.
+
+### 8. 提纲式结尾（🟡 维基）
+
+末尾以空转段收尾，宣布"挑战仍在，前路可期"，或列出 `Challenges and Legacy` 一类只有标题没有内容的章节。
+
+- **触发标记**：`Despite these challenges…` / `Challenges and Legacy` / `Future Outlook` / `Conclusion` 类小标题或空转收尾段。
+- **改法**：删掉空转段。若原文确有下一步计划，保留该段并把已写出的内容写具体（**不得新增原文没有的计划、日期、负责人**）。
+- **不改**：正式报告体例确有「结论 / 下一步」章节，且其中写了具体内容。
+- ❌ Despite these challenges, the path forward is promising.
+  ✅ （删掉；若原文已写了具体计划，直接写那项计划）
+
+### 9. 模糊归属（🟡 维基）
+
+`experts argue` / `industry reports suggest` / `observers have noted` / `studies show`——不指明是谁。
+
+- **触发标记**：无来源的群体归属，且全文无脚注、链接或具名机构。
+- **改法**：按保真护栏处理（`references/01-fidelity-guardrails.md` 第 6 条）——**保留归属与论断**，必要时在正文外标注"缺来源"；**不得只删归属让无源论断变成裸事实**。
+- **不改**：原文给了来源、链接或具名机构时。
+- ❌ Industry reports suggest adoption is accelerating.
+  ✅ Industry reports suggest adoption is accelerating.（保留，标注"缺来源"，待作者补充）
+
+### 10. 三段式密度（🟡 维基）
+
+不是"看到三就改"。单组三项并列是正常修辞，维基实证有人把它当铁律，结果把人类特征删掉了。
+
+- **触发标记**：**几乎每段**都出现三组并列；或 `First… Second… Finally` 作为通篇小标题骨架。
+- **改法**：能概括就别逐项列；必须保留三项以上时，**改变其中一项的句法**，不让它们排成同一结构。不得删除必要项。
+- **不改**：单组三项（不是判据）；材料本身必须完整列出（法规、配置项、财务科目）；编号承担指代（"see item 3"）。
+- ❌ `## First, find where the ambiguity lives` / `## Second, write the requirement as six modules`
+  ✅ `## Find where the ambiguity lives` / `## Write the requirement as six modules`
+
+## 验收（改写后逐项复查）
+
+- 每一处改动都能明确对应**本文件某条编号规则**或 `references/02-banned-words-and-patterns.md` 禁词表；指不出对应规则的改动**必须撤销**。
+- 所有**未命中规则的句子逐字保留**；未顺便润色相邻文字。
+- **没有**用同义词机械替换命中项（维基实证：把 `delve` 批量换成 `look into` 反而制造新痕迹）。
+- **没有**按中文清单改英文，也没有按本文件的倍数去改中文。
+- 改写后**每个实词都能在原文指出出处**；姓名、数字、日期、引语、来源、因果，任一指不出出处者**必须撤销**。
+- 原文标题层级、章节顺序、段落数量与顺序、列表 / 表格 / 引用 / 代码块位置**完全保留**。
+- 交付前另跑一遍 `references/09-format-and-artifacts.md`（格式与残留标记清扫，中英共用）。
+
+---
+**执行要点**
+- **触发**：对英文文本做去味 / 改写时（词汇层之外的结构层检查）。
+- **必须动作**：按倍数由高到低逐项检查；命中即按"改法"处理，改动限于解决命中问题的最小范围；先读 `references/08-en-do-not-change.md` 排除保护项。
+- **禁止**：改动未命中规则的文字；动文章框架；用同义词替换命中项；把中文规则翻译过来套用；把本文件的倍数当作其他体裁（商务邮件 / IT 方案 / 汇报 / 幻灯片）的判据阈值。
+- **停止条件**：全部未命中规则的句子逐字保留、每处改动可指向具体规则、实词可溯源——三条同时满足方可输出。

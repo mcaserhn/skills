@@ -6,7 +6,7 @@
 
 ## 1. 白名单默认（最高优先级）
 
-本 skill 采用**白名单式**改写：**只能处理**禁词表（`references/02-banned-words-and-patterns.md`）与改写规则（`references/05-zh-syntax-and-structure.md`）中**明确列出**的问题；**未命中任何规则的文字必须逐字保留**。
+本 skill 采用**白名单式**改写：**只能处理**禁词表（`references/02-banned-words-and-patterns.md`）、对应语言的改写规则（中文 `references/05-zh-syntax-and-structure.md` / 英文 `references/07-en-syntax-and-structure.md`）与格式清扫清单（`references/09-format-and-artifacts.md`）中**明确列出**的问题；**未命中任何规则的文字必须逐字保留**。
 
 - 一句话即使命中规则，也只能改动**解决该问题所必需的最小范围**——不得顺便润色、不得替换没有问题的词语、不得调整语气 / 详略 / 信息密度。
 - 对某处**是否命中没有把握时，保持原文**。
