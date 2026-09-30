@@ -3,7 +3,7 @@ name: de-ai-flavor
 description: Remove "AI flavor" (AI 味儿) from LLM outputs in both conversational replies and document generation, for Chinese AND English text. Covers word-level banned lists plus parallel Chinese and English discourse/syntax rules, per-language do-not-change protection lists, and format / markup-artifact cleanup. Use when the user complains about AI-sounding text, wants human-like writing, or asks to humanize / de-AI-flavored content in either language.
 description_zh: "去除 LLM 输出的 AI 味儿（中文+英文）：覆盖对话与文档生成，含中英双语禁词表、中文篇章/句法层规则（11 项）、英文篇章/句法层规则（10 项）、中英各自的反向保护清单、格式与残留标记清扫、常驻人设 system 片段、文档模板、保真护栏（白名单默认/实词溯源/情态条件保护）"
 description_en: "Strip AI-sounding tone from LLM output in chat and documents, in Chinese and English, with bilingual banned-word lists, parallel Chinese and English discourse/syntax rules, per-language do-not-change lists, format and markup-artifact cleanup, persona system snippets, doc templates, and whitelist-first fidelity guardrails."
-version: 1.5.0
+version: 1.5.1
 status: stable
 license: MIT
 allowed-tools: Read,Write,Edit,Grep
@@ -122,5 +122,6 @@ AI 味儿不是语法错误，而是模型在"最大化先验概率"下输出的
 
 - 本 skill 为独立实现，未复制第三方源码。v1.2.0「保真护栏」的编辑哲学借鉴自开源项目 **shuorenhua（说人话，MIT License）**；v1.4.0 新增的**中文篇章 / 句法层规则**与**反向保护清单**改写自开源项目 **`lieflat-less-ai-tone`（MIT License）**，其规则基于 283 万字对照语料统计（**证据等级：高质量外部证据 · 待独立验证**）。评测数据以原作者自述为准。
 - v1.5.0 新增的**英文篇章 / 句法层规则**、**英文反向保护清单**与**格式 / 残留标记清扫**，依据 **Reinhart et al., "Do LLMs write like humans? Variation in grammatical and rhetorical styles", PNAS 122(8) e2422455122 (2025)**（HAP-E 平行语料 33.5M 词，数据与复现代码公开：`hf/3770`、`hf/3792`、`OSF 7MRQN`）与 **Wikipedia:Signs of AI writing**（WikiProject AI Cleanup，社区共识）。同轮按实测**修正**三处既有英文规则：被动语态摘出、hedge 降级为提示、判据改为密度。
-- **已知局限**：HAP-E 的 6 体裁（学术 / 博客 / 小说 / 新闻 / 口语 / 影视剧本）**不含商务邮件、IT 方案与汇报、幻灯片**，其倍数只作方向性依据；中文语料未公开、不可核验。两侧定量结论均**未在本 skill 自建语料上复算**（待办 P2）。
+- v1.5.1 对英文侧做**本地独立复算**：取用上条公开的 Biber 特征计数（`hf/3792`），以 `chunk-2` 为人类基准、配对 n=8,290（6 模型 × 6 体裁），复现论文五个关键倍数（误差 <1%、d 值一致），并从数据上确认「AI 味来自指令微调」——instruct/base 偏离比 **1.71×（8B）/ 1.80×（70B）**，基座模型最接近人类。据此把 `references/07-en-syntax-and-structure.md` 第 5 条与 `references/08-en-do-not-change.md` 第 4 条升级为 🟢 并补入量化依据，同时为 `references/08-en-do-not-change.md` 第 2、6、8 条补上模型依赖与反例边界。**未改动任何规则的触发条件或改法方向**（只提证据、不动判据）。
+- **已知局限**：HAP-E 的 6 体裁（学术 / 博客 / 小说 / 新闻 / 口语 / 影视剧本）**不含商务邮件、IT 方案与汇报、幻灯片**，其倍数只作方向性依据，**不能当本 skill 场景的判据阈值**——英文侧待自建语料（P2/B）补齐。中文侧语料未公开、不可核验，其定量结论仍**未经独立复算**。
 - 许可证：MIT。作者 Stanley Hao。

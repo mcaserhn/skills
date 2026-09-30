@@ -2,7 +2,7 @@
 
 > `de-ai-flavor` 按需参考（L3）。**何时加载：任何英文改写动作开始前先读本文件。**
 > **性质**：以下特征**看着像 AI 味，实测站不住**，**不得据此改写**。本清单与改写规则同为**硬约束**，不是参考——它的作用是防止"越改越不像人"。
-> **来源**：S1 = Reinhart et al., PNAS 122(8) e2422455122 (2025)（HAP-E 平行语料 33.5M 词）；S4 = Wikipedia:Signs of AI writing（WikiProject AI Cleanup）。
+> **来源**：S1 = Reinhart et al., PNAS 122(8) e2422455122 (2025)（HAP-E 平行语料 33.5M 词）。**S1′ = 本地独立复算**（2026-09-30，Biber 特征计数 `hf/3792`，人类基准 = chunk-2，配对 n=8,290）。S4 = Wikipedia:Signs of AI writing（WikiProject AI Cleanup）。
 > **适用范围**：**仅英文**。第 1–5 条的观察基于维基百科语境（百科体、25 年编辑语料），**其他体裁未经同等验证**，作方向性提示而非铁律；第 6–7 条为跨体裁语料测量。本清单不与中文规则互推——中文侧见 `references/06-do-not-change.md`。
 
 ## 核心风险
@@ -14,18 +14,18 @@
 | # | 特征 | 证据 |
 |---|---|---|
 | 1 | **简单的 is / has 短语**（`there is a`、`it has a`） | S4：人类 25 年编辑语料中更常见。**不要为"生动"把 `is` 换成 `serves as` / `represents`——后者才是 AI 特征，见 `references/07-en-syntax-and-structure.md` 第 5 条** |
-| 2 | **普通动词而非"高级"同义词** | S4：`wrote`（≠ `authored`）、`moved`（≠ `relocated`）、`used`（≠ `utilized`）、`tried`（≠ `attempted`）、`died`（≠ `passed away`）均为人类更常用。**把 `used` 改成 `utilized` 是制造 AI 味** |
+| 2 | **普通动词而非"高级"同义词** | S4：`wrote`（≠ `authored`）、`moved`（≠ `relocated`）、`used`（≠ `utilized`）、`tried`（≠ `attempted`）、`died`（≠ `passed away`）均为人类更常用。**S1′ 复算佐证**：AI 平均词长 1.16×（d=2.24，全库最大效应量）、属性形容词 1.50×——系统性偏向更长、更"高级"的词。**把 `used` 改成 `utilized` 是制造 AI 味** |
 | 3 | **最高级与确定性陈述**（`one of the best`、`is the only`、`was the first`） | S4：人类更常用。不得因"太绝对"而软化——作者要下判断就让他下 |
-| 4 | **Hedging qualifiers 与 intensifiers**（`very`、`perhaps`、`tends to`） | S4 明确引用 S1 的 HAP-E 结论：**人类更常用**。与 `references/02-banned-words-and-patterns.md` 把 hedge 降为"仅提示"同向，且是第二个独立来源 |
+| 4 | **Hedging qualifiers 与 intensifiers**（`very`、`perhaps`、`tends to`） | 🟢 S4 引用 + **S1′ 复算证实**：hedges 在**全部 6 个模型上均 <1**（0.50–0.92），方向完全一致——是全库唯一模型间无翻转的 hedge 类特征。与 `references/02-banned-words-and-patterns.md` 把 hedge 降为"仅提示"同向 |
 | 5 | **孤立的冗词结构**（`as a result of`、`in order to`、`all of the`、`a part of`、`the fact that`） | S4：列为人类更常见。⚠️ **百科体观察，其他体裁未验证**——不要主动扩用 |
-| 6 | **无施事被动语态**（`it is believed that`、`was determined by`） | S1（HAP-E）：AI ≈0.5×，**人类多用 2 倍**。2026-09-30 从 `references/02-banned-words-and-patterns.md` 五组特征表摘出移入 |
+| 6 | **无施事被动语态**（`it is believed that`、`was determined by`） | S1（HAP-E）：AI ≈0.5×，**人类多用 2 倍**；**S1′ 复算**：GPT-4o 0.53×（d=−0.56）成立，但基座模型 ≈1.0（跨模型 0.51–1.01）——**该规则模型依赖**，判据仍看触发标记而非频率。2026-09-30 从 `references/02-banned-words-and-patterns.md` 五组特征表摘出移入 |
 | 7 | **脏话与粗俗语** | S1（HAP-E）：AI 使用比人类低 **100 倍以上**。不要"净化"原文的粗俗表达 |
 
 ## B. 非 AI 信号（维基专门列为无效，含子节 `WP:AIELEVAR`）
 
 | # | 特征 | 说明 |
 |---|---|---|
-| 8 | **词汇多样性 / elegant variation** | S4 列为**非** AI 信号（老模型带 repetition penalty 才会换词）。原文另注：非英语母语者（如意大利语教学）也习惯避免重复词。**且与 `references/02-banned-words-and-patterns.md` "禁同义词机械替换"同向** |
+| 8 | **词汇多样性 / elegant variation** | S4 列为**非** AI 信号（老模型带 repetition penalty 才会换词）。原文另注：非英语母语者（如意大利语教学）也习惯避免重复词。**S1′ 复算**：2024 年模型类符/形符比 1.13×（d=1.30）——AI 略**高**于人类；但该指标受文本长度影响，且 S4 记录其 2025–2026 已退潮，故**仍不作判据**。**且与 `references/02-banned-words-and-patterns.md` "禁同义词机械替换"同向** |
 | 9 | **语感类的"像 AI"印象** | S4 的 Ineffective indicators 一节明确列出三项无效指标：**完美语法**（专业写作者亦然）、**"bland / robotic" 的语感**、**"fancy / academic / formal" 的语感**。原文特别澄清：AI 偏好的是**一批特定词**，这个相关性**不延伸到所有正式文风** |
 
 ## C. 无效判据（不得单独作为改写依据）
