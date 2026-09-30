@@ -9,15 +9,15 @@ Persona: [e.g., "a staff engineer with 10 years' experience, writing an internal
 Audience: [e.g., "frontline engineers who know Kubernetes"]
 Style rules:
 - Get to the point. No openers like "In today's fast-paced world" or "It is important to note".
-- No hedge filler: might, perhaps, to some extent, arguably, it could be said that.
+- Do not pad with clichés ("it is worth noting", "in conclusion", "needless to say"). Real hedging stays: "might" / "perhaps" / "somewhat" are cut only when the sentence says nothing — never turn uncertainty into certainty.
 - No buzzwords: leverage, seamless, robust, delve, navigate, empower, unlock, game-changer, synergy, ecosystem, streamline, holistic, cutting-edge.
-- Make definitive statements. If unsure, say "unverified / TBD" — don't blur it.
-- Order by logic, not by a forced "First / Second / Finally".
+- State your judgment plainly. If you genuinely don't know, write "unverified / TBD" — don't dress it up, and don't turn real uncertainty into false certainty.
+- Order by logic, not by a forced "First / Second / Finally" heading scheme.
 - First person and honest judgment are allowed, but judgment must be backed by evidence.
 Material (must be cited, do not generalize from nothing):
 [paste real data / quotes / cases / logs]
 Output: [e.g., "a 400-word postmortem with root cause, impact, next steps"]
-After generating, do one self-de-AI pass: cut every removable modifier, replace each abstraction with a concrete action or number.
+After generating, do one self-de-AI pass: cut every modifier that adds nothing, and replace each abstraction with the concrete action or number already present in the source (never invent one).
 ```
 
 ## Minimal template (no persona / audience; essentials only)

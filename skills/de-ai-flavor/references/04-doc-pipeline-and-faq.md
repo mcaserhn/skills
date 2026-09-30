@@ -42,6 +42,8 @@
 
 - **v1.2.0 新增「保真护栏」**：情态/条件/承诺保护、抽象可保留、代码块逐字、来源处理四模式、编辑幅度档位（in-place/bounded/structural）、只标问题审稿模式。借鉴自开源项目 **shuorenhua（说人话，v2.5.0，MIT License，作者 MrGeDiao）** 的编辑哲学 —— "保真优先的最小编辑"。
 - **v1.3.0 结构重构**：单文件拆为薄 `SKILL.md` + `references/`（4）+ `assets/`（4），功能与规则不变，仅为降低常驻 token 占用（原 16.5 KB 单文件超出 L2「SKILL.md < 5k token」建议上限）。
+- **v1.4.0 中文侧强化**：新增中文篇章 / 句法层规则（`references/05-zh-syntax-and-structure.md`，11 项）与中文反向保护清单（`references/06-do-not-change.md`，10 项）；修订禁词表两处（虚词摘出「必删」、三段式靶子改为「序数词当小标题」）。依据 `lieflat-less-ai-tone`（MIT）的 283 万字对照语料统计。
+- **v1.5.0 英文侧补齐**：新增英文篇章 / 句法层规则（`references/07-en-syntax-and-structure.md`，10 项，按 HAP-E 倍数排序）、英文反向保护清单（`references/08-en-do-not-change.md`，12 项）、格式与残留标记清扫（`references/09-format-and-artifacts.md`，中英共用）；依 HAP-E（PNAS 2025）实测**修正三处**英文规则（被动语态摘出、hedge 降级为提示、判据改为密度 + 禁同义词机械替换）；`SKILL.md` 新增**语言门控**按语言分派加载。文件数 11 → 14。
 - **保留的自身优势**：中英双语禁词表、对话常驻人格、文档四阶段管线（定向→投喂→生成→去味）、自我去味改写 pass。
 - **独立性声明**：本 skill 为独立实现，未复制 shuorenhua 源码；评测数据以原作者自述为准（待独立验证），本 skill 尚未建立自动化评测集。
 - **许可**：MIT，作者 Stanley Hao。若对外分发建议保留上述借鉴声明。

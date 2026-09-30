@@ -20,7 +20,7 @@
 | Skill | 说明 | 版本 | 状态 | 文件数 |
 |---|---|---|---|---|
 | [`spp-source-principle`](skills/spp-source-principle/) | 源头原则协议（SPP v4.0 R4.3）执行引擎——承重结论判定、课题共构、证据链与三态治理、G/A/S 三轴、不可逆操作门禁 | R4.3 | stable | 27 |
-| [`de-ai-flavor`](skills/de-ai-flavor/) | 去除 LLM 输出的「AI 味儿」（中英双语）——双语禁词表 + 中文篇章/句法层规则 + 反向保护清单 + 常驻人设片段 + 保真护栏 | 1.4.0 | stable | 11 |
+| [`de-ai-flavor`](skills/de-ai-flavor/) | 去除 LLM 输出的「AI 味儿」（中英双语）——双语禁词表 + 中英**各自**的篇章/句法层规则 + **各自的**「不许改」保护清单 + 格式与残留标记清扫 + 常驻人设片段 + 保真护栏 | 1.5.0 | stable | 14 |
 
 完整目录（含自动统计的描述、版本、文件数）见 [`CATALOG.md`](CATALOG.md)，由 `scripts/build-catalog.py` 从各 skill 的 frontmatter 生成。
 
@@ -75,6 +75,7 @@ Copy-Item -Recurse -Force "$env:TEMP\skills\skills\de-ai-flavor"        "$env:US
 
 ### 最近更新
 
+- **2026-09-30** — `de-ai-flavor` 升版 **1.5.0**：**补齐英文侧**，与中文侧对称——新增英文篇章/句法层规则（`references/07`，10 项按 HAP-E 倍数排序）、英文反向保护清单（`references/08`，12 项）、格式与残留标记清扫（`references/09`，中英共用）；依 PNAS 2025 的 33.5M 词平行语料实测，**修正三处旧规则**——被动语态摘出并移入保护清单、hedge 降级为「仅提示」、判据改为「密度 + 触发标记」并明令禁止同义词机械替换；`SKILL.md` 新增**语言门控**（中英专用规则不交叉加载）
 - **2026-09-30** — `de-ai-flavor` 升版 **1.4.0**：新增中文篇章/句法层规则（`references/05`，11 项按证据强度排序）与反向保护清单（`references/06`，10 项「不许改」）；对照 283 万字语料统计修订禁词表——虚词移出必删清单、三段式改判为「序数词当小标题」；重写保真护栏为白名单默认 + 实词溯源
 - **2026-09-30** — `de-ai-flavor` 分层拆分：单文件 → 薄入口 `SKILL.md` + `references/` ×6 + `assets/` ×4
 - **2026-09-30** — 仓库初始化，收纳 `spp-source-principle`（27 文件）与 `de-ai-flavor`
@@ -98,7 +99,7 @@ My **personal collection of Agent Skills**. Each skill is a self-contained direc
 | Skill | What it does | Version | Status | Files |
 |---|---|---|---|---|
 | [`spp-source-principle`](skills/spp-source-principle/) | Execution engine for the Source Principle Protocol (SPP v4.0 R4.3) — load-bearing conclusions, subject co-construction, evidence chains, three-state governance, G/A/S tri-axis, irreversible-operation gating | R4.3 | stable | 27 |
-| [`de-ai-flavor`](skills/de-ai-flavor/) | Removes "AI flavor" from LLM output (Chinese + English) — bilingual banned-word lists, Chinese discourse/syntax rules, a do-not-change list, persona snippets, fidelity guardrails | 1.4.0 | stable | 11 |
+| [`de-ai-flavor`](skills/de-ai-flavor/) | Removes "AI flavor" from LLM output (Chinese + English) — bilingual banned-word lists, **parallel** Chinese and English discourse/syntax rules, **per-language** do-not-change lists, format / markup-artifact cleanup, persona snippets, fidelity guardrails | 1.5.0 | stable | 14 |
 
 See [`CATALOG.md`](CATALOG.md) for the full listing (with generated descriptions, versions and file counts), produced by `scripts/build-catalog.py` from each skill's frontmatter.
 
@@ -143,6 +144,7 @@ cp -r /tmp/skills/skills/de-ai-flavor        ~/.workbuddy/skills/
 
 ### Recent changes
 
+- **2026-09-30** — `de-ai-flavor` released as **1.5.0**: **English side filled in**, now symmetric with Chinese — added English discourse/syntax rules (`references/07`, 10 items ordered by HAP-E multipliers), an English do-not-change list (`references/08`, 12 items), and format / markup-artifact cleanup (`references/09`, shared); **corrected three legacy English rules** against the PNAS 2025 parallel corpus (33.5M words) — passive voice moved out to the protection list, hedging demoted to a hint, criterion switched to "density + trigger markers" with synonym-swapping explicitly forbidden; added a **language gate** to `SKILL.md` (Chinese-only and English-only rules never load together)
 - **2026-09-30** — `de-ai-flavor` released as **1.4.0**: added Chinese discourse/syntax rules (`references/05`, 11 items ordered by evidence strength) and a do-not-change protection list (`references/06`, 10 items); revised the banned-word lists against a 2.83M-character corpus (function words moved out of the must-delete list, tricolon narrowed to "ordinal as heading"); rewrote fidelity guardrails as whitelist-first with word-level provenance
 - **2026-09-30** — `de-ai-flavor` split: monolithic file -> thin `SKILL.md` + `references/` x6 + `assets/` x4
 - **2026-09-30** — repository initialised with `spp-source-principle` (27 files) and `de-ai-flavor`
