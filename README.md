@@ -5,6 +5,18 @@
 
 📖 [中文文档](#中文文档) · [English Documentation](#english-documentation)
 
+**解决什么问题** — 用 AI 干真正要落地的活，缺两样东西：**可核查**，和**不像机器写的**。`spp-source-principle` 管前者：承重结论必须带出处、必须区分「已确认 / 待验证」、遇到不可逆操作必须停下来等人批准。`de-ai-flavor` 管后者：中英双语去掉 LLM 文本里的「AI 味儿」。
+
+**谁该用** — 把 AI 用在架构选型、合规审计、研究结论、方案评审这类「错了要付代价」场景的人；以及要把中文或英文文本对外发出去、不希望被读成 AI 生成的人。
+
+**最小上手路径** — `git clone` 本仓库 → 把 `skills/<name>/` 整个目录拷进你的客户端 skills 目录 → 对话里说一句「启动 SPP」或「去掉 AI 味儿」。无依赖、无 API key、无需配置。
+
+**What it solves** — Pointing AI at work that actually ships leaves two gaps: **verifiability**, and **not sounding machine-written**. `spp-source-principle` covers the first — load-bearing conclusions must carry provenance, must be tagged confirmed vs. unverified, and irreversible operations must stop for human sign-off. `de-ai-flavor` covers the second — stripping "AI flavor" from LLM output, in Chinese and English.
+
+**Who it's for** — Anyone using AI on architecture choices, compliance, research findings, or design reviews, where being wrong costs real money; and anyone publishing Chinese or English text that must not read as AI-generated.
+
+**How to start** — `git clone` this repo → copy the whole `skills/<name>/` directory into your client's skills directory → say "启动 SPP" or "去掉 AI 味儿" in chat. No dependencies, no API key, no configuration.
+
 ---
 
 ## 中文文档
