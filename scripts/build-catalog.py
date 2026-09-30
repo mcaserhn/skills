@@ -97,7 +97,7 @@ def main():
     lines.append("Total: **%d** skill(s)." % len(rows))
     lines.append("")
 
-    OUT.write_text("\n".join(lines), encoding="utf-8")
+    OUT.write_text("\n".join(lines), encoding="utf-8", newline="\n")
     print("Wrote %s (%d skill(s))" % (OUT, len(rows)))
     return 0
 
