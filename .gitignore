@@ -1,0 +1,26 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# temp / scratch
+*.tmp
+*.log
+_scratch/
+
+# secrets
+.env
+.env.*
+*.key
+*.pem
+credentials.json
