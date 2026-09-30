@@ -1,0 +1,23 @@
+# Normalize line endings for this repository.
+#
+# This collection is consumed by multiple Agent Skills clients
+# (WorkBuddy, Claude Code, Cursor, ...) on Windows / macOS / Linux.
+# Storing LF and checking out LF everywhere keeps SKILL.md, references
+# and assets byte-identical across platforms.
+
+* text=auto eol=lf
+
+*.md    text eol=lf
+*.py    text eol=lf
+*.json  text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.txt   text eol=lf
+
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.pdf   binary
+*.zip   binary
