@@ -75,8 +75,9 @@ def main():
             "name": get_field(fm, "name") or d.name,
             "dir": d.name,
             "desc": short(get_field(fm, "description")),
-            "version": nested_field(fm, "version") or get_field(fm, "version") or "-",
-            "status": nested_field(fm, "status") or "-",
+            "version": (nested_field(fm, "version") or get_field(fm, "version")
+                        or nested_field(fm, "protocol_version") or "-"),
+            "status": nested_field(fm, "status") or get_field(fm, "status") or "-",
             "files": sum(1 for p in d.rglob("*") if p.is_file()),
         })
 

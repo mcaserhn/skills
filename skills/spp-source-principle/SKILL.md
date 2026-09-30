@@ -16,6 +16,8 @@ description: >
   unstructured real-time exchange (SPP §1.3).
 license: MIT
 metadata:
+  version: "R4.3"
+  status: stable
   protocol_version: "v4.0 DRAFT 4 Revision 4.3"
   protocol_date: "2026-08-26"
   self_governance_approved: "2026-09-28 (§15.7)"

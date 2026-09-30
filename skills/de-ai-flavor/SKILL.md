@@ -4,6 +4,7 @@ description: Remove "AI flavor" (AI 味儿) from LLM outputs in both conversatio
 description_zh: "去除 LLM 输出的 AI 味儿（中文+英文）：覆盖对话与文档生成，含中英双语禁词表、中文篇章/句法层规则（11 项）、反向保护清单、常驻人设 system 片段、文档模板、保真护栏（白名单默认/实词溯源/情态条件保护）"
 description_en: "Strip AI-sounding tone from LLM output in chat and documents, in Chinese and English, with bilingual banned-word lists, Chinese discourse/syntax rules, a do-not-change list, persona system snippets, doc templates, and whitelist-first fidelity guardrails with word-level provenance."
 version: 1.4.0
+status: stable
 license: MIT
 allowed-tools: Read,Write,Edit,Grep
 display_name: "de-ai-flavor"
