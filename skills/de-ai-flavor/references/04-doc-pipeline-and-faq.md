@@ -11,9 +11,9 @@
 
 ## 可调参数（叠加在模板后）
 
-- **编辑幅度**：在模板产出要求后追加 `scope=in-place | bounded | structural`（含义见 `references/01-fidelity-guardrails.md` 第 5 条）。
+- **编辑幅度**：在模板产出要求后追加 `scope=in-place | bounded | structural`（含义见 `references/01-fidelity-guardrails.md` 第 7 条）。
 - **只标问题**：追加"只标问题，不改写"，进入审稿模式，只输出问题片段 + 理由，不交替换全文。
-- **来源处理**：追加 `rewrite-safe`（删无源论断）或默认保留归属 + 标缺口（见 `references/01-fidelity-guardrails.md` 第 4 条）。
+- **来源处理**：追加 `rewrite-safe`（删无源论断）或默认保留归属 + 标缺口（见 `references/01-fidelity-guardrails.md` 第 6 条）。
 - **保真冲突时**：任何去味动作若会改变事实 / 情态 / 条件 / 归属，撤回该改动，保留原表述。
 
 ## 人设/受众是否必须？
@@ -48,6 +48,7 @@
 - **v1.4.0 中文侧强化**：新增中文篇章 / 句法层规则（`references/05-zh-syntax-and-structure.md`，11 项）与中文反向保护清单（`references/06-do-not-change.md`，10 项）；修订禁词表两处（虚词摘出「必删」、三段式靶子改为「序数词当小标题」）。依据 `lieflat-less-ai-tone`（MIT）的 283 万字对照语料统计。
 - **v1.5.0 英文侧补齐**：新增英文篇章 / 句法层规则（`references/07-en-syntax-and-structure.md`，10 项，按 HAP-E 倍数排序）、英文反向保护清单（`references/08-en-do-not-change.md`，12 项）、格式与残留标记清扫（`references/09-format-and-artifacts.md`，中英共用）；依 HAP-E（PNAS 2025）实测**修正三处**英文规则（被动语态摘出、hedge 降级为提示、判据改为密度 + 禁同义词机械替换）；`SKILL.md` 新增**语言门控**按语言分派加载。文件数 11 → 14。
 - **v1.6.0 评估层补齐**：新增 `references/10-ai-check-forensics.md`（取证打分：十类信号 / 30 分、输出格式、阈值、检测天花板）与 `scripts/ai_pattern_lint.py`（确定性 linter：规则编号直挂 02/05/07/09、只报不改、可进 CI）。骨架借鉴 `harshaneel/humanize` 的 `ai-check` 与 `shir-danishyar/humanize` 的 linter（均 MIT），**判据按本 skill 证据重新校准**——外部判为 AI 信号的 hedge / 被动语态 / em dash / 词汇多样性，在本 skill 的 references/06 / references/08 里是人类特征，故列为硬排除。文件数 14 → 16（+1 reference，+1 scripts）。校验方法由两种增为三种（补机械检查）。
+- **v1.6.1 边界补齐（纯增文本，判据与 linter 均未改）**：据与 `op7418/Humanizer-zh`、`blader/humanizer`、`harshaneel/humanize` 的对标，补三处**判定边界**——① `05` 第 1 / 9 / 10.1 条补上缺失的「不改」行，`05` 第 4 条与 `07` 第 5 条的保留行强化（后者明令不得反向把 `is` 升级成 `represents`）；② `01` 第 1 节新增「**上下文级排除**」（标题 / 专有名词 / 元语言指称 / 引文），第 4 节补「承载作者声音的细节」；③ `01` 新增第 9 节「**样本与风格文档优先**」，把样本优先权从 `06` / `08` 的「使用纪律」提为护栏级。另 `10` 第 0 节补**文本年代**与**上下文级排除**两条边界，并修正 `03` / `04` 中三处指向 `01` 的失效条款编号。写法借鉴 `blader/humanizer` 与 `op7418/Humanizer-zh`（均 MIT）的结构，未复制文字。**校验方法不变（仍是三种）。**
 - **保留的自身优势**：中英双语禁词表、对话常驻人格、文档四阶段管线（定向→投喂→生成→去味）、自我去味改写 pass。
 - **独立性声明**：本 skill 为独立实现，未复制 shuorenhua 源码；评测数据以原作者自述为准（待独立验证），本 skill 尚未建立自动化评测集。
 - **许可**：MIT，作者 Stanley Hao。若对外分发建议保留上述借鉴声明。

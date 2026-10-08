@@ -4,7 +4,7 @@
 
 对话里的 AI 味儿额外来自三处：**客套开场/收尾、过度展开+反问、默认助手腔**。把对应语言的常驻人格放进 system，所有对话自动去味 —— 可复制片段见 `assets/persona-zh-system.md`、`assets/persona-en-system.md`。
 
-> 跨语言提示：虚词类（可能 / 或许、might / perhaps 等）仅当作为填充套话时禁用；若作者确在表达不确定或附带条件（见 `references/01-fidelity-guardrails.md` 第 1 条），必须保留，不得改写为确定语气。
+> 跨语言提示：虚词类（可能 / 或许、might / perhaps 等）仅当作为填充套话时禁用；若作者确在表达不确定或附带条件（见 `references/01-fidelity-guardrails.md` 第 3 条），必须保留，不得改写为确定语气。
 
 关键技巧（中英通用）：**把文档的"改写 pass"压缩进每轮** —— 在 system 加一句"输出最终回复前先自查是否出现套话/客套/虚词，若有则重写后再输出"（英文："before outputting, self-check for clichés / pleasantries / filler and rewrite if found"）。
 
