@@ -26,6 +26,7 @@ DEFAULT_LOCAL = pathlib.Path.home() / ".workbuddy" / "skills"
 WHITELIST = [
     "spp-source-principle",
     "de-ai-flavor",
+    "devils-advocate",
 ]
 
 SKIP_NAMES = {".DS_Store", "Thumbs.db", "desktop.ini", "__pycache__"}
