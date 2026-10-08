@@ -1,7 +1,6 @@
 # AI 产出验收清单（定制扩展 · 产出后验证层）
 
 > 三态标注：**待验证**（AI 提议，需人类验证）。本文为定制扩展，非 SPP R4.3 原文。冲突时以主协议为准。
-> 来源：资料库 draft-03（「了解 spp-source-principle 原理」页，2026-09-29 会话产出；入库批准：用户 2026-09-29）。
 > 依据：Veracode 2026 GenAI Code Security Report、Anthropic Best Practices、ThoughtWorks Radar Vol 34、DORA 2025。检索时点 2026-09-29。
 > 定位：`assets/preflight-checklist.md` 管「AI 输出前自查」；本清单管**产出物验收**——AI（或任何人）交付工作成果后、人类接受前的核查层。人类与 AI 共用。
 
