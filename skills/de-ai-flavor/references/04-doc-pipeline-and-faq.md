@@ -24,10 +24,13 @@
 - **强推荐项**：人设 + 受众。成本极低（两行字），收益最高 —— 把"不套话"定向到正确方向。
 - **可省略项**：仅当输出是结构化/纯事实（表格、代码、抽取），或已提供 few-shot 样例时。
 
-## 校验（两种廉价方法，中英通用）
+## 校验（三种方法，中英通用）
 
+- **机械检查（最可复核）**：跑 `python3 scripts/ai_pattern_lint.py <file>`。返回规则编号 + 行号 + 原文片段 + 密度，退出码 0/1 可直接进 CI。改完**复跑**，确认密度下降且未引入新命中。`--show-protected` 列出永不报的排除清单。
 - **朗读测试**：拗口、排比堆砌、一听就像营销/PR 文案的，必是 AI 味儿。英文同理 —— "unlock synergy" "move the needle" 一听即假。
 - **具体性检查**：每个论点是否带数字、人名、动作？没有就是空话，重写。
+
+> 机械检查只覆盖正则可判定的子集（见 `references/10-ai-check-forensics.md` 第 8 节分工说明）。朗读与具体性检查仍不可省——**脚本没报不等于没有 AI 味，脚本报了也不等于每处都该改**。
 
 ## 常见误区
 
@@ -44,6 +47,7 @@
 - **v1.3.0 结构重构**：单文件拆为薄 `SKILL.md` + `references/`（4）+ `assets/`（4），功能与规则不变，仅为降低常驻 token 占用（原 16.5 KB 单文件超出 L2「SKILL.md < 5k token」建议上限）。
 - **v1.4.0 中文侧强化**：新增中文篇章 / 句法层规则（`references/05-zh-syntax-and-structure.md`，11 项）与中文反向保护清单（`references/06-do-not-change.md`，10 项）；修订禁词表两处（虚词摘出「必删」、三段式靶子改为「序数词当小标题」）。依据 `lieflat-less-ai-tone`（MIT）的 283 万字对照语料统计。
 - **v1.5.0 英文侧补齐**：新增英文篇章 / 句法层规则（`references/07-en-syntax-and-structure.md`，10 项，按 HAP-E 倍数排序）、英文反向保护清单（`references/08-en-do-not-change.md`，12 项）、格式与残留标记清扫（`references/09-format-and-artifacts.md`，中英共用）；依 HAP-E（PNAS 2025）实测**修正三处**英文规则（被动语态摘出、hedge 降级为提示、判据改为密度 + 禁同义词机械替换）；`SKILL.md` 新增**语言门控**按语言分派加载。文件数 11 → 14。
+- **v1.6.0 评估层补齐**：新增 `references/10-ai-check-forensics.md`（取证打分：十类信号 / 30 分、输出格式、阈值、检测天花板）与 `scripts/ai_pattern_lint.py`（确定性 linter：规则编号直挂 02/05/07/09、只报不改、可进 CI）。骨架借鉴 `harshaneel/humanize` 的 `ai-check` 与 `shir-danishyar/humanize` 的 linter（均 MIT），**判据按本 skill 证据重新校准**——外部判为 AI 信号的 hedge / 被动语态 / em dash / 词汇多样性，在本 skill 的 references/06 / references/08 里是人类特征，故列为硬排除。文件数 14 → 16（+1 reference，+1 scripts）。校验方法由两种增为三种（补机械检查）。
 - **保留的自身优势**：中英双语禁词表、对话常驻人格、文档四阶段管线（定向→投喂→生成→去味）、自我去味改写 pass。
 - **独立性声明**：本 skill 为独立实现，未复制 shuorenhua 源码；评测数据以原作者自述为准（待独立验证），本 skill 尚未建立自动化评测集。
 - **许可**：MIT，作者 Stanley Hao。若对外分发建议保留上述借鉴声明。

@@ -1,12 +1,12 @@
 ---
 name: de-ai-flavor
-description: Remove "AI flavor" (AI 味儿) from LLM outputs in both conversational replies and document generation, for Chinese AND English text. Covers word-level banned lists plus parallel Chinese and English discourse/syntax rules, per-language do-not-change protection lists, and format / markup-artifact cleanup. Use when the user complains about AI-sounding text, wants human-like writing, or asks to humanize / de-AI-flavored content in either language.
-description_zh: "去除 LLM 输出的 AI 味儿（中文+英文）：覆盖对话与文档生成，含中英双语禁词表、中文篇章/句法层规则（11 项）、英文篇章/句法层规则（10 项）、中英各自的反向保护清单、格式与残留标记清扫、常驻人设 system 片段、文档模板、保真护栏（白名单默认/实词溯源/情态条件保护）"
-description_en: "Strip AI-sounding tone from LLM output in chat and documents, in Chinese and English, with bilingual banned-word lists, parallel Chinese and English discourse/syntax rules, per-language do-not-change lists, format and markup-artifact cleanup, persona system snippets, doc templates, and whitelist-first fidelity guardrails."
-version: 1.5.2
+description: Remove "AI flavor" (AI 味儿) from LLM outputs in both conversational replies and document generation, for Chinese AND English text. Covers word-level banned lists plus parallel Chinese and English discourse/syntax rules, per-language do-not-change protection lists, format / markup-artifact cleanup, a forensic scoring rubric (AI-check) with a protected-items audit, and a deterministic Python linter. Use when the user complains about AI-sounding text, wants human-like writing, asks to humanize / de-AI-flavored content, asks "does this sound AI?" or wants the text scored and linted.
+description_zh: "去除 LLM 输出的 AI 味儿（中文+英文）：覆盖对话与文档生成，含中英双语禁词表、中文篇章/句法层规则（11 项）、英文篇章/句法层规则（10 项）、中英各自的反向保护清单、格式与残留标记清扫、常驻人设 system 片段、文档模板、保真护栏（白名单默认/实词溯源/情态条件保护）；并含取证打分（AI-check 十类信号 0–30 分，附保护项复核）与确定性 Python linter（规则编号直挂 02/05/07/09，只报不改，可进 CI）"
+description_en: "Strip AI-sounding tone from LLM output in chat and documents, in Chinese and English, with bilingual banned-word lists, parallel Chinese and English discourse/syntax rules, per-language do-not-change lists, format and markup-artifact cleanup, persona system snippets, doc templates, whitelist-first fidelity guardrails, a forensic scoring rubric (AI-check, 10 signals / 30 points, with a protected-items audit), and a deterministic stdlib-only Python linter keyed to the skill's own rule IDs."
+version: 1.6.0
 status: stable
 license: MIT
-allowed-tools: Read,Write,Edit,Grep
+allowed-tools: Read,Write,Edit,Grep,Bash
 display_name: "de-ai-flavor"
 display_name_en: "de-ai-flavor"
 visibility: "user"
@@ -22,6 +22,8 @@ visibility: "user"
 - 需要"写得像人""humanize""去 AI 化"
 - 配置一个不该像助手的对话人格（system prompt），中文或英文
 - 生成复盘、方案、汇报、邮件等文档时想去掉套话
+- 用户问"这段像 AI 写的吗 / 打个分 / 给我个取证分析" / "does this sound AI?" → 走**取证打分**（`references/10-ai-check-forensics.md`）
+- 需要**可重复、可进 CI** 的机械检查 → 跑**确定性 linter**（`scripts/ai_pattern_lint.py`）
 
 ## 核心原理（统一，中英文通用）
 
@@ -66,6 +68,31 @@ AI 味儿不是语法错误，而是模型在"最大化先验概率"下输出的
 
 细则见 `references/02-banned-words-and-patterns.md`。
 
+## 评估层：取证打分 + 确定性 linter（**只诊断，不改写**）
+
+去味是"改"，评估是"判"。两者是**两条独立通道**——评估结论本身**不是**改写理由，只有落到 01/02/05/07/09 的具体条目上，改动才成立。
+
+| 能力 | 性质 | 位置 | 什么时候用 |
+|---|---|---|---|
+| **取证打分**（AI-check） | 判断性 · 十类信号 / 30 分 | `references/10-ai-check-forensics.md` | 用户问"像不像 AI""打个分""取证分析"；交付前要可复核的诊断报告 |
+| **确定性 linter** | 机械性 · 正则可判定子集 | `scripts/ai_pattern_lint.py` | 需要可重复、可进 CI 的检查；改完复跑验证 |
+
+```bash
+python3 scripts/ai_pattern_lint.py draft.md            # 人读报告，退出码 0/1
+python3 scripts/ai_pattern_lint.py --json draft.md     # 机器可读
+python3 scripts/ai_pattern_lint.py --lang zh --threshold 8 draft.md
+python3 scripts/ai_pattern_lint.py --list-rules        # 规则编号 → 本 skill 文件对照
+python3 scripts/ai_pattern_lint.py --show-protected    # 永不报的排除清单
+```
+
+三条硬规矩：
+
+1. **规则编号直挂本 skill**：linter 的每条命中都标 `02-*` / `05-*` / `07-*` / `09-*`，**不引用任何外部检测器的私有编号**。命中即可回溯到具体文件具体条目。
+2. **反向保护清单是硬排除**：`references/06-do-not-change.md` / `references/08-en-do-not-change.md` 里的项（被动语态、hedge、问句、比喻、单组三项、词汇多样性、简单 is/has、普通动词……）**永不判为命中**。通用 AI 检测器会把它们报成 AI 味——那是**本 skill 与它们的根本分歧**（详见 `references/10-ai-check-forensics.md` 第 1 节）。
+3. **只报不改**：linter **不提供任何自动改写 / 同义词替换功能**。`references/02-banned-words-and-patterns.md` 明令禁止机械换词——把 `delve` 批量换成 `look into` 是制造新痕迹。
+
+> **两者不一致时**：脚本命中但按报告判为保护项 → **以报告为准**；报告命中但脚本无输出 → 属判断性信号，须给原文片段作证。
+
 ## 保真护栏（精简版 · 优先于任何禁词）
 
 去味是把表达变自然，**不是改变事实或作者意图**。冲突时保真优先。
@@ -94,6 +121,8 @@ AI 味儿不是语法错误，而是模型在"最大化先验概率"下输出的
 | **中文反向保护清单（看着像 AI 味、实测站不住，不得改写）** | `references/06-do-not-change.md` | **zh only** |
 | **英文篇章 / 句法层规则（10 项，按 HAP-E 倍数排序）** | `references/07-en-syntax-and-structure.md` | **en only** |
 | **英文反向保护清单（不得改写）** | `references/08-en-do-not-change.md` | **en only** |
+| **取证打分（AI-check 十类信号 / 30 分 + 保护项复核 + 输出格式 + 检测天花板）** | `references/10-ai-check-forensics.md` | 共用 |
+| **确定性 linter（正则可判定子集，只报不改，可进 CI）** | `scripts/ai_pattern_lint.py` | 共用 |
 | 中文常驻人格（可直接复制） | `assets/persona-zh-system.md` | zh |
 | English persona（copy-paste） | `assets/persona-en-system.md` | en |
 | 中文文档模板（完整 + 极简） | `assets/doc-template-zh.md` | zh |
@@ -102,6 +131,8 @@ AI 味儿不是语法错误，而是模型在"最大化先验概率"下输出的
 > **改写前先读反向清单**：中文 → `references/06-do-not-change.md`；英文 → `references/08-en-do-not-change.md`。它们说"什么绝不改"，比"改什么"更该先看。
 >
 > **交付前跑格式清扫**：`references/09-format-and-artifacts.md`（中英共用，机器残留标记零假阳性）。
+>
+> **要打分先跑脚本**：`python3 scripts/ai_pattern_lint.py <file> --show-protected` 先拿到确定性结果与排除清单，再按 `references/10-ai-check-forensics.md` 写报告。报告里的 `保护项复核` 一节**必填**。
 
 ## 输出前自查（中英通用）
 
@@ -113,6 +144,7 @@ AI 味儿不是语法错误，而是模型在"最大化先验概率"下输出的
 - 是否误改了**对应语言的反向保护清单**里的项（中文：问句 / 比喻 / 句内排比 / 被动句 / 正文连接词；英文：简单 is-has / 普通动词 / 最高级 / hedge / 被动 / 脏话 / 词汇多样性）？→ 改了则**撤回**。
 - **交付前是否扫过格式与残留标记**（`[cite: 1]` / `oai_citation` / `turn0search0` / 粗体滥用 / 标题层级 / 弯引号）？→ 未扫则补 `references/09-format-and-artifacts.md`。
 - 是否用**同义词机械替换**了命中项（如 `delve` → `look into`）？→ 是则撤销——那是新痕迹，不是去味。
+- 若本次是在**改一篇已有文件**：改完是否复跑 `scripts/ai_pattern_lint.py`，确认密度下降且**未引入新命中**？→ 未跑则补跑。
 - 每处改动是否都能**指向具体规则**？未命中规则的句子是否**逐字保留**？→ 否则撤回该改动。
 - 改写后**每个实词能否在原文指出出处**？→ 指不出来的新增**必须撤销**。
 - 去味后是否改变了事实、情态、条件、归属、数字、完成状态？→ 改了则撤回该改动。
@@ -124,5 +156,6 @@ AI 味儿不是语法错误，而是模型在"最大化先验概率"下输出的
 - v1.5.0 新增的**英文篇章 / 句法层规则**、**英文反向保护清单**与**格式 / 残留标记清扫**，依据 **Reinhart et al., "Do LLMs write like humans? Variation in grammatical and rhetorical styles", PNAS 122(8) e2422455122 (2025)**（HAP-E 平行语料 33.5M 词，数据与复现代码公开：`hf/3770`、`hf/3792`、`OSF 7MRQN`）与 **Wikipedia:Signs of AI writing**（WikiProject AI Cleanup，社区共识）。同轮按实测**修正**三处既有英文规则：被动语态摘出、hedge 降级为提示、判据改为密度。
 - v1.5.1 对英文侧做**本地独立复算**：取用上条公开的 Biber 特征计数（`hf/3792`），以 `chunk-2` 为人类基准、配对 n=8,290（6 模型 × 6 体裁），复现论文五个关键倍数（误差 <1%、d 值一致），并从数据上确认「AI 味来自指令微调」——instruct/base 偏离比 **1.71×（8B）/ 1.80×（70B）**，基座模型最接近人类。据此把 `references/07-en-syntax-and-structure.md` 第 5 条与 `references/08-en-do-not-change.md` 第 4 条升级为 🟢 并补入量化依据，同时为 `references/08-en-do-not-change.md` 第 2、6、8 条补上模型依赖与反例边界。**未改动任何规则的触发条件或改法方向**（只提证据、不动判据）。
 - v1.5.2 对英文侧做一次**口径核对**：以 S1 作者开源的 `pseudobibeR`（R 包，MIT，CRAN；S1 数据页确认其 Biber 特征即由此包算出）**逐条比对源码**（不读注释），据此更正 `references/07-en-syntax-and-structure.md`：① 第 3 条原写「名词性 `That … is …` 从句作主句主语」，而 `f_29` 实为 **that 关系从句**（`the dog [that bit me]`，`that` 前接名词且自身作 `nsubj`）——**结构错配，已更正**；② 第 2 条后缀由 `-ance` 更正为实际的 `-ness / -ity`；③ 第 4 条并列类别补全为名词 / 形容词 / 动词 / 副词四类；④ 第 1 条补上 `f_25` 的真实判据（**紧随标点的 `VBG` 状语 / 补语从句**，含句首与句中，非仅句尾）。核对同时确认：维基「Superficial analyses」节独立引 S1 支持「句尾 `-ing` 短语」这一观察。
-- **已知局限**：HAP-E 的 6 体裁（学术 / 博客 / 小说 / 新闻 / 口语 / 影视剧本）**不含商务邮件、IT 方案与汇报、幻灯片**，其倍数只作方向性依据，**不能当本 skill 场景的判据阈值**——英文侧待自建语料（P2/B）补齐。中文侧语料未公开、不可核验，其定量结论仍**未经独立复算**。
+- **v1.6.0 评估层补齐（取证打分 + 确定性 linter）**：新增 `references/10-ai-check-forensics.md`（十类信号 / 30 分、0–3 严重度映射、输出格式、阈值、检测天花板）与 `scripts/ai_pattern_lint.py`（仅标准库，规则编号直挂 02/05/07/09，支持 `--json` / `--threshold` / `--lang` / `--list-rules` / `--show-protected`，退出码可进 CI，**不提供任何自动改写功能**）。骨架借鉴开源项目 **`harshaneel/humanize` 的 `ai-check` 子技能与 `shir-danishyar/humanize` 的 linter（均 MIT）**，但**判据按本 skill 的对照语料证据逐条重新校准**——外部把 hedge、被动语态、em dash、词汇多样性判为 AI 信号，而本 skill 的 `references/06-do-not-change.md` / `references/08-en-do-not-change.md` 有实测证据表明这些是**人类更常用的特征**，故一律列为硬排除、永不判为命中（见 `references/10-ai-check-forensics.md` 第 1 节冲突处置表）。中文侧另新增 16 项机械可判定检查（05 第 1/2/4/5a/5b/6/7/8/9/10.2/10.3/10.4/10.5/11 条）。信号数由外部的 9 类 / 27 分调为 **10 类 / 30 分**（增格式层 J 类，对应 `references/09-format-and-artifacts.md`）；中文文本因 A / B 两类权重受限，**总分不得跨语言比较**。
+- **已知局限**：HAP-E 的 6 体裁（学术 / 博客 / 小说 / 新闻 / 口语 / 影视剧本）**不含商务邮件、IT 方案与汇报、幻灯片**，其倍数只作方向性依据，**不能当本 skill 场景的判据阈值**——英文侧待自建语料（P2/B）补齐。中文侧语料未公开、不可核验，其定量结论仍**未经独立复算**。linter 只覆盖机械可判定子集：**05 第 3 条（相邻句同款）与第 10.1 条（过长前置定语）无法正则判定**，仍须人工过；脚本对引语只排除「」『』“”，**英文直引号内的引文未机械排除**，须人工复核。
 - 许可证：MIT。作者 Stanley Hao。
