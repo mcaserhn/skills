@@ -5,13 +5,13 @@
 
 📖 [中文文档](#中文文档) · [English Documentation](#english-documentation)
 
-**解决什么问题** — 用 AI 干真正要落地的活，缺三样东西：**可核查**、**不像机器写的**，和**经得起追问**。`spp-source-principle` 管第一样：承重结论必须带出处、必须区分「已确认 / 待验证」、遇到不可逆操作必须停下来等人批准。`de-ai-flavor` 管第二样：中英双语去掉 LLM 文本里的「AI 味儿」。`devils-advocate` 管第三样：给已经成形的方案做对抗性审查，只报跨过「承重线」的风险，并在挑刺没被采纳时自动降档——它不是靠嘴毒，是靠按程序凿证据。
+**解决什么问题** — 用 AI 干真正要落地的活，缺三样东西：**可核查**、**不像机器写的**，和**经得起追问**。`spp-source-principle` 管第一样：承重结论必须带出处、必须区分「已确认 / 待验证」、遇到不可逆操作必须停下来等人批准。`de-ai-flavor` 管第二样：中英双语去掉 LLM 文本里的「AI 味儿」。`devils-advocate` 管第三样：给已经成形的方案做对抗性审查，只报跨过「承重线」的风险，并在挑刺没被采纳时自动降档——它不是靠嘴毒，是靠按程序凿证据。另有一块底座：`context-persistence` 管**上下文不丢**——跨模型切换、隔天复用同一任务时，按 KV Cache 友好布局注入静态前缀与状态栏，开场即恢复，不必从零复述背景。
 
 **谁该用** — 把 AI 用在架构选型、合规审计、研究结论、方案评审这类「错了要付代价」场景的人；要把中文或英文文本对外发出去、不希望被读成 AI 生成的人；以及手里已经攥着一个方案、想在被别人挑刺之前先自己过一遍的人。
 
 **最小上手路径** — `git clone` 本仓库 → 把 `skills/<name>/` 整个目录拷进你的客户端 skills 目录 → 对话里说一句「启动 SPP」、「去掉 AI 味儿」或「毒舌陪练」。无依赖、无 API key、无需配置。
 
-**What it solves** — Pointing AI at work that actually ships leaves three gaps: **verifiability**, **not sounding machine-written**, and **surviving challenge**. `spp-source-principle` covers the first — load-bearing conclusions must carry provenance, must be tagged confirmed vs. unverified, and irreversible operations must stop for human sign-off. `de-ai-flavor` covers the second — stripping "AI flavor" from LLM output, in Chinese and English. `devils-advocate` covers the third — adversarial review of an already-formed plan, reporting only the risks that cross a load-bearing threshold and backing off automatically once its critiques go unused; it earns its keep through procedure, not harshness.
+**What it solves** — Pointing AI at work that actually ships leaves three gaps: **verifiability**, **not sounding machine-written**, and **surviving challenge**. `spp-source-principle` covers the first — load-bearing conclusions must carry provenance, must be tagged confirmed vs. unverified, and irreversible operations must stop for human sign-off. `de-ai-flavor` covers the second — stripping "AI flavor" from LLM output, in Chinese and English. `devils-advocate` covers the third — adversarial review of an already-formed plan, reporting only the risks that cross a load-bearing threshold and backing off automatically once its critiques go unused; it earns its keep through procedure, not harshness. One more foundation layer: `context-persistence` keeps context from being lost — when switching models or resuming the same task days later, it injects a KV-cache-friendly static prefix plus status bar, so a session resumes instead of restarting from a fresh briefing.
 
 **Who it's for** — Anyone using AI on architecture choices, compliance, research findings, or design reviews, where being wrong costs real money; anyone publishing Chinese or English text that must not read as AI-generated; and anyone holding a finished plan who wants to red-team it before somebody else does.
 
@@ -34,6 +34,7 @@
 | [`spp-source-principle`](skills/spp-source-principle/) | 源头原则协议（SPP v4.0 R4.3）执行引擎——承重结论判定、课题共构、证据链与三态治理、G/A/S 三轴、不可逆操作门禁 | R4.3 | stable | 27 |
 | [`de-ai-flavor`](skills/de-ai-flavor/) | 去除 LLM 输出的「AI 味儿」（中英双语）——双语禁词表 + 中英**各自**的篇章/句法层规则 + **各自的**「不许改」保护清单 + 格式与残留标记清扫 + 常驻人设片段 + 保真护栏 + **评估层**（AI-Check 取证打分 + 确定性 Python linter，只诊断不改写） + **判定边界**（上下文级排除 + 样本优先） | 1.6.2 | stable | 16 |
 | [`devils-advocate`](skills/devils-advocate/) | 毒舌陪练 / 反方批判者模式——给已经成形的想法做对抗性检验：零奉承但不零确认、阈值制（只报跨过「承重线」的风险且无下限）、三档强度、缺参数单列、挑刺未被采纳即自动降档、模式边界 | 1.0.0 | stable | 1 |
+| [`context-persistence`](skills/context-persistence/) | 跨模型 / 跨时间上下文持久化（KV Cache 友好注入）——A 静态前缀 / B 状态栏 / C 参考层 / D 外部来源四通道契约，记忆层分层声明（〔常驻〕注入 / 〔按需〕只列名）、三个动作（开场 layout / 每回合末 capture / 结束 flush+export）、模型适配注册表、外部内容单一咽喉点统一包裹为不可信数据 | 1.2.0 | stable | 1 |
 
 完整目录（含自动统计的描述、版本、文件数）见 [`CATALOG.md`](CATALOG.md)，由 `scripts/build-catalog.py` 从各 skill 的 frontmatter 生成。
 
@@ -55,7 +56,8 @@
 └── skills/                    # 全部 skill 平铺于此，一目录一 skill
     ├── spp-source-principle/
     ├── de-ai-flavor/
-    └── devils-advocate/
+    ├── devils-advocate/
+    └── context-persistence/
 ```
 
 ### 安装
@@ -69,6 +71,7 @@ git clone https://github.com/mcaserhn/skills.git /tmp/skills
 cp -r /tmp/skills/skills/spp-source-principle ~/.workbuddy/skills/
 cp -r /tmp/skills/skills/de-ai-flavor        ~/.workbuddy/skills/
 cp -r /tmp/skills/skills/devils-advocate     ~/.workbuddy/skills/
+cp -r /tmp/skills/skills/context-persistence ~/.workbuddy/skills/
 
 # Claude Code:
 # cp -r /tmp/skills/skills/<name> ~/.claude/skills/
@@ -79,6 +82,7 @@ git clone https://github.com/mcaserhn/skills.git $env:TEMP\skills
 Copy-Item -Recurse -Force "$env:TEMP\skills\skills\spp-source-principle" "$env:USERPROFILE\.workbuddy\skills\"
 Copy-Item -Recurse -Force "$env:TEMP\skills\skills\de-ai-flavor"        "$env:USERPROFILE\.workbuddy\skills\"
 Copy-Item -Recurse -Force "$env:TEMP\skills\skills\devils-advocate"     "$env:USERPROFILE\.workbuddy\skills\"
+Copy-Item -Recurse -Force "$env:TEMP\skills\skills\context-persistence" "$env:USERPROFILE\.workbuddy\skills\"
 ```
 
 ### 维护约定
@@ -91,6 +95,7 @@ Copy-Item -Recurse -Force "$env:TEMP\skills\skills\devils-advocate"     "$env:US
 
 ### 最近更新
 
+- **2026-10-19** — 新增 **`context-persistence`**（**1.2.0**）：把「换模型、隔天续同一任务时上下文不能丢」变成一套可执行契约。地基是 **KV Cache 友好注入**：上下文拆成 **A 静态前缀**（身份，写一次后字节级冻结）/ **B 状态栏**（每轮追加到对话末尾的 `<agent_status>`）/ **C 参考层**（跨会话事实 + 近期日志）/ **D 外部来源**（采集时原样存、注入时统一包裹为不可信数据）四条通道，并明令**禁止把 time / 状态 / 进度写进 system 前缀**——实测踩坑代价是 TTFT 0.5s→3-5s、账单近乎翻倍。配套四件事：**记忆层分层声明**（`## 标题 〔常驻〕` 整节注入 / `〔按需〕` 只列名，渲染唯一出口是 `render_memory_excerpt()`）；**三个动作**（开场 `layout` / 每回合末 `capture` / 结束 `flush` + `export` 生成可移植握手包）；**模型适配注册表**（workbuddy / claude / gpt / raw，新增模型只写一份 wrapper，不动存储层与核心代码）；**外部内容单一咽喉点**（采集与包裹解耦，但不给「忘记」留位置）。另含体量边界（`[A]/[C]` 有 cap、`[B]/[D]` 无 cap，压缩判据是「最坏每轮达窗口 80%」而非「数字看着大」）与一条硬教训：**装载位置与收尾纪律同等重要**——本技能曾在交付后 15 天零写入而失效，根因是只存在于不被会话收录的目录。已加入 `scripts/sync-from-local.py` 白名单与 `CATALOG.md`。
 - **2026-10-08** — 新增 **`devils-advocate`**（通用版 **1.0.0**）：一个**反方批判者 / 毒舌陪练**模式，对**已经成形**的想法、方案或判断做对抗性审查，而不是提供安慰。三条核心纪律：**零奉承但不零确认**（事实层面成立的判断必须直说——一个从不承认对方正确的批判者，其否定会退化成背景噪声）；**阈值制输出**（只报跨过「承重线」的风险，≤ 5 条且**无下限**，一条都不过线就直说「本轮无承重级问题」）；**自动降档**（连续若干轮挑刺未被采纳，即判定未被使用并主动停供）。另含三档强度（轻 / 标准 / 全力）、缺参数单列（计入未决项总数，不另开旁路）、模式边界（断言式，不适用于想法尚在概念期）。已加入 `scripts/sync-from-local.py` 白名单与 `CATALOG.md`。
 - **2026-10-08** — `de-ai-flavor` 升版 **1.6.2**（**`SKILL.md` 瘦身，功能零变化**）：入口文件由 20,957 B / 6,495 tok 压到 **13,411 B / 4,051 tok**（o200k；cl100k 4,986），**两个口径均回到自设的「SKILL.md < 5k token」上限之内**。做法全部是**搬移与去重**，不动任何触发条件、判据、规则编号或 linter：① 原「来源与许可」整章（版本沿革 + 证据引注 + 已知局限，约占入口 30%）外移 —— **证据源与逐版沿革**并入 `references/04`，**已知局限**归入 `references/10` 第 7 / 8 节（并补上 linter 的两处覆盖缺口：`05` 第 3 / 10.1 条无法正则判定、英文直引号内引文未机械排除），`SKILL.md` 只留许可 / 借鉴来源 / 证据基础 / 指针四行；② 原「三个层次」+「语言门控」+「路由表」三张各列一遍同一批文件的表**合并为一张「加载路由表」**（行 = 文件，列 = 层 / 语言 / 何时读）；③「输出前自查」由 12 条压到 7 条，与上一节重复的保真项收成一行「保真四查」指回本节。文件数不变（16）
 - **2026-10-08** — `de-ai-flavor` 升版 **1.6.1**：据与 `op7418/Humanizer-zh`、`blader/humanizer`、`harshaneel/humanize` 三个同类项目的逐文件对标，补三处**判定边界**（**纯增文本，未改任何触发条件、改法方向或 linter 规则**）——① **规则自带保留边界**：`references/05` 第 1（翻案腔）/ 9（禁用起手式）/ 10.1（过长前置定语）三条补上缺失的「不改」行，`references/05` 第 4 条与 `references/07` 第 5 条的保留行强化（后者**明令不得反向**把正常的 `is` / `has` 升级成 `serves as` / `represents`）；② **上下文级排除**：`references/01` 第 1 节新增「标题 / 专有名词 / 元语言指称 / 引文」四类**不构成命中**的边界（其中元语言指称同时是 linter 的已知识别边界——正则分不清「使用」与「提及」），第 4 节补「承载作者声音的细节」保护；③ **新增 `references/01` 第 9 节「样本与风格文档优先」**：把原本只写在 `references/06` / `08`「使用纪律」里的样本优先权提为**护栏级**。另 `references/10` 第 0 节补**文本年代**（2022-11-30 之前的文本不可能由 LLM 生成）与上下文边界，并修正 `references/03` / `04` 中三处指向 `01` 的**失效条款编号**。写法借鉴 `blader/humanizer` 与 `op7418/Humanizer-zh`（均 MIT）的结构，未复制文字
@@ -123,6 +128,7 @@ My **personal collection of Agent Skills**. Each skill is a self-contained direc
 | [`spp-source-principle`](skills/spp-source-principle/) | Execution engine for the Source Principle Protocol (SPP v4.0 R4.3) — load-bearing conclusions, subject co-construction, evidence chains, three-state governance, G/A/S tri-axis, irreversible-operation gating | R4.3 | stable | 27 |
 | [`de-ai-flavor`](skills/de-ai-flavor/) | Removes "AI flavor" from LLM output (Chinese + English) — bilingual banned-word lists, **parallel** Chinese and English discourse/syntax rules, **per-language** do-not-change lists, format / markup-artifact cleanup, persona snippets, fidelity guardrails, an **evaluation layer** (AI-Check forensic scoring + a deterministic Python linter; diagnose only, never rewrite), and **decision boundaries** (context-level exclusions + sample-overrides-all) | 1.6.2 | stable | 16 |
 | [`devils-advocate`](skills/devils-advocate/) | Devil's-advocate / adversarial-review mode — pressure-tests a plan you already hold: zero flattery but not zero acknowledgement, threshold-based output (only risks past the load-bearing line, with no floor), three intensity levels, missing parameters listed separately, automatic de-escalation once its critiques go unused, and explicit mode boundaries | 1.0.0 | stable | 1 |
+| [`context-persistence`](skills/context-persistence/) | Cross-model / cross-session context persistence with KV-cache-friendly injection — a four-channel contract (A static prefix / B status bar / C reference layer / D external sources), memory-layer injection declarations ([resident] injects / [on-demand] names only), three actions (layout on open / capture each turn / flush+export on close), a model-adapter registry, and a single choke point that wraps all external content as untrusted data | 1.2.0 | stable | 1 |
 
 See [`CATALOG.md`](CATALOG.md) for the full listing (with generated descriptions, versions and file counts), produced by `scripts/build-catalog.py` from each skill's frontmatter.
 
@@ -144,7 +150,8 @@ See [`CATALOG.md`](CATALOG.md) for the full listing (with generated descriptions
 └── skills/                    # All skills, flat - one directory per skill
     ├── spp-source-principle/
     ├── de-ai-flavor/
-    └── devils-advocate/
+    ├── devils-advocate/
+    └── context-persistence/
 ```
 
 ### Installation
@@ -156,6 +163,7 @@ git clone https://github.com/mcaserhn/skills.git /tmp/skills
 cp -r /tmp/skills/skills/spp-source-principle ~/.workbuddy/skills/   # WorkBuddy
 cp -r /tmp/skills/skills/de-ai-flavor        ~/.workbuddy/skills/
 cp -r /tmp/skills/skills/devils-advocate     ~/.workbuddy/skills/
+cp -r /tmp/skills/skills/context-persistence ~/.workbuddy/skills/
 # cp -r /tmp/skills/skills/<name> ~/.claude/skills/                  # Claude Code
 ```
 
@@ -169,6 +177,7 @@ cp -r /tmp/skills/skills/devils-advocate     ~/.workbuddy/skills/
 
 ### Recent changes
 
+- **2026-10-19** — new skill **`context-persistence`** (**1.2.0**): turns "context must not be lost when switching models or resuming the same task days later" into an executable contract. Its foundation is **KV-cache-friendly injection**: context is split into four channels — **A static prefix** (identity, frozen byte-for-byte after the first write), **B status bar** (an `<agent_status>` block appended to the end of the dialogue each turn), **C reference layer** (cross-session facts + recent journal), and **D external sources** (stored verbatim on capture, wrapped as untrusted data on injection) — with an explicit ban on writing time / status / progress into the system prefix; the measured cost of that mistake is TTFT 0.5s -> 3-5s and a near-doubled bill. Four mechanisms come with it: **memory-layer injection declarations** (`## Heading [resident]` injects the whole section / `[on-demand]` lists the name only, with `render_memory_excerpt()` as the single rendering exit); **three actions** (`layout` on open / `capture` at the end of every turn / `flush` on close plus `export` for a portable handoff bundle); a **model-adapter registry** (workbuddy / claude / gpt / raw — adding a model is one wrapper, never a change to the storage layer or core code); and a **single choke point for external content** (decoupling capture from wrapping, leaving no room for "forgot"). It also carries volume boundaries (`[A]/[C]` capped, `[B]/[D]` uncapped, with compression gated on "worst-case turn hits 80% of the window" rather than "the number looks big") and one hard lesson: **where a skill is loaded matters as much as wrap-up discipline** — this skill once died from 15 days of zero writes because it lived only in a directory no session ever scans. Added to the `scripts/sync-from-local.py` whitelist and `CATALOG.md`.
 - **2026-10-08** — new skill **`devils-advocate`** (general-purpose, **1.0.0**): an **adversarial-review / devil's-advocate** mode that pressure-tests an already-formed idea, plan or judgement instead of offering reassurance. Three disciplines carry it: **zero flattery but not zero acknowledgement** (when a point is factually sound it has to be said out loud — a critic who never concedes degrades into background noise); **threshold-based output** (only the risks that cross the load-bearing line, at most five and with **no floor** — if none qualify, it says so in a single line); and **automatic de-escalation** (after several rounds of unused critiques it declares itself unused and stops supplying more). It also carries three intensity levels (light / standard / full), a separate listing for missing parameters (folded into the open-items total instead of opening a side channel), and mode boundaries (assertion-style; not for ideas still in the concept stage). Added to the `scripts/sync-from-local.py` whitelist and `CATALOG.md`.
 - **2026-10-08** — `de-ai-flavor` released as **1.6.2** (**`SKILL.md` slimmed down, zero functional change**): the entry file went from 20,957 B / 6,495 tok to **13,411 B / 4,051 tok** (o200k; cl100k 4,986), bringing **both encodings back under this skill's self-imposed "SKILL.md < 5k tokens" cap**. Every change is a move or a de-duplication — no trigger condition, criterion, rule ID or linter rule was touched: (1) the former "sources and licence" chapter (version history + evidence citations + known limitations, roughly 30% of the entry) was relocated, with **evidence sources and the version-by-version history** folded into `references/04` and **known limitations** into `references/10` sections 7 / 8 — which also picks up the linter's two remaining coverage gaps (`references/05` items 3 and 10.1 cannot be decided by regex, and quotations inside straight double quotes are not mechanically excluded) — leaving `SKILL.md` with four lines for licence, borrowed sources, evidence basis and pointers; (2) the former "three layers" + "language gate" + "routing table" sections — three tables each listing the same set of files — were **merged into a single load-routing table** (rows = files, columns = layer / language / when to read); (3) "self-check before output" dropped from 12 items to 7, with the fidelity items that duplicated the preceding section folded into one "fidelity four-check" line pointing back to it. File count unchanged (16)
 - **2026-10-08** — `de-ai-flavor` released as **1.6.1**: three sets of **decision boundaries** added after a file-by-file comparison against `op7418/Humanizer-zh`, `blader/humanizer` and `harshaneel/humanize` (**text additions only — no trigger condition, rewrite direction or linter rule was changed**). (1) **Every rule now carries its own retention boundary**: `references/05` items 1 (not-X-but-Y), 9 (banned openers) and 10.1 (overlong pre-modifiers) gain the "do not change" lines they were missing, and the retention lines of `references/05` item 4 and `references/07` item 5 are strengthened — the latter now explicitly **forbids the reverse move** of upgrading a normal `is` / `has` into `serves as` / `represents`. (2) **Context-level exclusions**: `references/01` section 1 gains four categories that **do not count as a hit** — headings, proper nouns, metalinguistic mention (a passage *discussing* a word rather than *using* it) and quotations / dialogue; metalinguistic mention is also a documented linter limitation, since a regex engine cannot tell use from mention. Section 4 gains the "voice-carrying details" protection. (3) **New `references/01` section 9, "sample and style document take precedence"**, promoting the sample-first rule from the discipline notes in `references/06` / `08` up to guardrail level. `references/10` section 0 additionally gains the **text-age** boundary (nothing written before 2022-11-30 can be LLM-generated) and the context-level exclusion, and three broken clause cross-references into `references/01` were fixed in `references/03` / `04`. Wording follows the structure of `blader/humanizer` and `op7418/Humanizer-zh` (both MIT); no text was copied

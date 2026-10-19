@@ -27,6 +27,7 @@ WHITELIST = [
     "spp-source-principle",
     "de-ai-flavor",
     "devils-advocate",
+    "context-persistence",
 ]
 
 SKIP_NAMES = {".DS_Store", "Thumbs.db", "desktop.ini", "__pycache__"}
