@@ -7,15 +7,15 @@
 
 **解决什么问题** — 用 AI 干真正要落地的活，缺三样东西：**可核查**、**不像机器写的**，和**经得起追问**。`spp-source-principle` 管第一样：承重结论必须带出处、必须区分「已确认 / 待验证」、遇到不可逆操作必须停下来等人批准。`de-ai-flavor` 管第二样：中英双语去掉 LLM 文本里的「AI 味儿」。`devils-advocate` 管第三样：给已经成形的方案做对抗性审查，只报跨过「承重线」的风险，并在挑刺没被采纳时自动降档——它不是靠嘴毒，是靠按程序凿证据。另有一块底座：`context-persistence` 管**上下文不丢**——跨模型切换、隔天复用同一任务时，按 KV Cache 友好布局注入静态前缀与状态栏，开场即恢复，不必从零复述背景。
 
-**谁该用** — 把 AI 用在架构选型、合规审计、研究结论、方案评审这类「错了要付代价」场景的人；要把中文或英文文本对外发出去、不希望被读成 AI 生成的人；以及手里已经攥着一个方案、想在被别人挑刺之前先自己过一遍的人。
+**谁该用** — 把 AI 用在架构选型、合规审计、研究结论、方案评审这类「错了要付代价」场景的人；要把中文或英文文本对外发出去、不希望被读成 AI 生成的人；手里已经攥着一个方案、想在被别人挑刺之前先自己过一遍的人；以及经常换模型、或同一个任务要跨好几天断续接着做，受不了每次开场从零复述背景的人。
 
-**最小上手路径** — `git clone` 本仓库 → 把 `skills/<name>/` 整个目录拷进你的客户端 skills 目录 → 对话里说一句「启动 SPP」、「去掉 AI 味儿」或「毒舌陪练」。无依赖、无 API key、无需配置。
+**最小上手路径** — `git clone` 本仓库 → 把 `skills/<name>/` 整个目录拷进你的客户端 skills 目录 → 对话里说一句「启动 SPP」、「去掉 AI 味儿」、「毒舌陪练」或「恢复上下文」。除 `context-persistence` 的引擎需另行部署（见下注）外，无依赖、无 API key、无需配置。
 
 **What it solves** — Pointing AI at work that actually ships leaves three gaps: **verifiability**, **not sounding machine-written**, and **surviving challenge**. `spp-source-principle` covers the first — load-bearing conclusions must carry provenance, must be tagged confirmed vs. unverified, and irreversible operations must stop for human sign-off. `de-ai-flavor` covers the second — stripping "AI flavor" from LLM output, in Chinese and English. `devils-advocate` covers the third — adversarial review of an already-formed plan, reporting only the risks that cross a load-bearing threshold and backing off automatically once its critiques go unused; it earns its keep through procedure, not harshness. One more foundation layer: `context-persistence` keeps context from being lost — when switching models or resuming the same task days later, it injects a KV-cache-friendly static prefix plus status bar, so a session resumes instead of restarting from a fresh briefing.
 
-**Who it's for** — Anyone using AI on architecture choices, compliance, research findings, or design reviews, where being wrong costs real money; anyone publishing Chinese or English text that must not read as AI-generated; and anyone holding a finished plan who wants to red-team it before somebody else does.
+**Who it's for** — Anyone using AI on architecture choices, compliance, research findings, or design reviews, where being wrong costs real money; anyone publishing Chinese or English text that must not read as AI-generated; anyone holding a finished plan who wants to red-team it before somebody else does; and anyone who keeps switching models or spreads one task across days and is tired of re-explaining the background from scratch at the start of every session.
 
-**How to start** — `git clone` this repo → copy the whole `skills/<name>/` directory into your client's skills directory → say "启动 SPP", "去掉 AI 味儿" or "毒舌陪练" in chat. No dependencies, no API key, no configuration.
+**How to start** — `git clone` this repo → copy the whole `skills/<name>/` directory into your client's skills directory → say "启动 SPP", "去掉 AI 味儿", "毒舌陪练" or "恢复上下文" in chat. No dependencies, no API key, no configuration — except `context-persistence`, whose engine is deployed separately (see note below).
 
 ---
 
@@ -37,6 +37,8 @@
 | [`context-persistence`](skills/context-persistence/) | 跨模型 / 跨时间上下文持久化（KV Cache 友好注入）——A 静态前缀 / B 状态栏 / C 参考层 / D 外部来源四通道契约，记忆层分层声明（〔常驻〕注入 / 〔按需〕只列名）、三个动作（开场 layout / 每回合末 capture / 结束 flush+export）、模型适配注册表、外部内容单一咽喉点统一包裹为不可信数据 | 1.2.0 | stable | 1 |
 
 完整目录（含自动统计的描述、版本、文件数）见 [`CATALOG.md`](CATALOG.md)，由 `scripts/build-catalog.py` 从各 skill 的 frontmatter 生成。
+
+> **注**：`context-persistence` 描述的是**协议与行为规范**；它驱动的引擎（`context_manager.py` / `k_lint.py` / `measure_context.py`）是单独组件，作者另行部署、未随本 skill 发布。没有引擎时，可按其 `SKILL.md` 的 A/B/C/D 契约手工执行（文件内保留了兜底路径）。
 
 ### 目录结构
 
@@ -131,6 +133,8 @@ My **personal collection of Agent Skills**. Each skill is a self-contained direc
 | [`context-persistence`](skills/context-persistence/) | Cross-model / cross-session context persistence with KV-cache-friendly injection — a four-channel contract (A static prefix / B status bar / C reference layer / D external sources), memory-layer injection declarations ([resident] injects / [on-demand] names only), three actions (layout on open / capture each turn / flush+export on close), a model-adapter registry, and a single choke point that wraps all external content as untrusted data | 1.2.0 | stable | 1 |
 
 See [`CATALOG.md`](CATALOG.md) for the full listing (with generated descriptions, versions and file counts), produced by `scripts/build-catalog.py` from each skill's frontmatter.
+
+> **Note**: `context-persistence` is a **protocol and behaviour specification**; the engine it drives (`context_manager.py` / `k_lint.py` / `measure_context.py`) is a separate component deployed by the author and not published with this skill. Without the engine, its A/B/C/D contract can be followed by hand — the fallback path is documented inside the file.
 
 ### Repository layout
 
