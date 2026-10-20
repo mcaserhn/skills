@@ -3,7 +3,7 @@ name: de-ai-flavor
 description: Remove "AI flavor" (AI 味儿) from LLM outputs in both conversational replies and document generation, for Chinese AND English text. Covers word-level banned lists plus parallel Chinese and English discourse/syntax rules, per-language do-not-change protection lists, format / markup-artifact cleanup, a forensic scoring rubric (AI-check) with a protected-items audit, and a deterministic Python linter. Use when the user complains about AI-sounding text, wants human-like writing, asks to humanize / de-AI-flavored content, asks "does this sound AI?" or wants the text scored and linted.
 description_zh: "去除 LLM 输出的 AI 味儿（中文+英文）：覆盖对话与文档生成，含中英双语禁词表、中文篇章/句法层规则（11 项）、英文篇章/句法层规则（10 项）、中英各自的反向保护清单、格式与残留标记清扫、常驻人设 system 片段、文档模板、保真护栏（白名单默认/实词溯源/情态条件保护）；并含取证打分（AI-check 十类信号 0–30 分，附保护项复核）与确定性 Python linter（规则编号直挂 02/05/07/09，只报不改，可进 CI）"
 description_en: "Strip AI-sounding tone from LLM output in chat and documents, in Chinese and English, with bilingual banned-word lists, parallel Chinese and English discourse/syntax rules, per-language do-not-change lists, format and markup-artifact cleanup, persona system snippets, doc templates, whitelist-first fidelity guardrails, a forensic scoring rubric (AI-check, 10 signals / 30 points, with a protected-items audit), and a deterministic stdlib-only Python linter keyed to the skill's own rule IDs."
-version: 1.6.2
+version: 1.6.3
 status: stable
 license: MIT
 allowed-tools: Read,Write,Edit,Grep,Bash
@@ -127,3 +127,4 @@ python3 scripts/ai_pattern_lint.py --list-rules        # 规则编号 → 本 sk
 - **借鉴来源**（均 MIT，只借结构，未复制文字）：`shuorenhua`（保真护栏）、`lieflat-less-ai-tone`（中文篇章层与反向清单）、`harshaneel/humanize` 的 `ai-check` 与 `shir-danishyar/humanize` 的 linter（评估层骨架）、`blader/humanizer`（上下文级排除、样本优先）。**判据按本 skill 语料逐条重校，与来源并不一致**——外部判为 AI 信号的 hedge / 被动 / em dash / 词汇多样性，在本 skill 是受保护的人类特征。
 - **证据基础**：英文侧依 Reinhart et al., PNAS 122(8) e2422455122 (2025)（HAP-E 平行语料，数据 `hf/3770` / `hf/3792`）+ **本地独立复算**（配对 n=8,290）；中文侧依 283 万字对照语料统计（**外部证据，未经独立复算**）；格式层依 *Wikipedia:Signs of AI writing*（社区共识）。分级 🟢 复算 / 官方 · 🟡 社区共识 · ⚪ 待验证。
 - **已知局限与完整沿革**：HAP-E 六体裁**不含商务邮件 / IT 方案 / 汇报 / 幻灯片**，倍数只作方向性依据；linter 只覆盖机械可判定子集——详见 `references/10-ai-check-forensics.md` 第 7 / 8 节。证据源与逐版沿革见 `references/04-doc-pipeline-and-faq.md`。
+- **与 SPP 的互引（v1.6.3）**：反迎合的**原则层权威**在 SPP R4.4 §2.6（不讨好 / 不无声漂移 / 禁空吹捧 / 不隐匿异议）；本 skill 承载**词汇层操作清单**，两侧互为引用、不得各自成单，任何一侧修改后回查对侧（分工与例外条款落 `references/02-banned-words-and-patterns.md` 文首「与 SPP 的单一来源分工」节）。品质词汇例外依 SPP R4.4 §11.8：仅身份声明语境可审慎借用，禁入结论 / 证据 / 分析正文。
