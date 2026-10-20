@@ -3,7 +3,7 @@ name: context-persistence
 description: 跨模型/跨时间统一上下文持久化，并按 KV Cache 友好布局注入。开场恢复背景/目标/进度，会话中记录决策与进度，结束写日志；任意模型切换或隔天复用都能续上。当用户在多个模型之间切换、隔天继续同一任务、或需要恢复「我们上次做到哪 / 为什么这样决策」时使用。触发词：上下文持久化、恢复上下文、隔天继续、换模型续上、context-persistence。
 description_zh: "跨模型/跨时间上下文持久化与 KV Cache 友好注入"
 description_en: "Cross-model, cross-session context persistence with KV-cache-friendly injection"
-version: "1.3.0"
+version: "1.3.1"
 license: MIT
 status: stable
 allowed-tools: Read,Write,Edit,Bash,Grep,Glob
@@ -69,6 +69,8 @@ display_name: "context-persistence"
 2. **每回合末（capture）**：出现目标/决策/进度/产物时即时持久化 ——
    `goal <文本>` ｜ `decide <决策> --r <理由>` ｜ `progress <文本>` ｜ `subgoal <描述>` ｜ `artifact <路径>` ｜ `open_question <问题>`
 3. **会话结束（flush）**：`flush "<今日摘要>"` 追加当日日志并更新 `meta.last_active`；跨环境换模型时再跑 `export` 生成可移植握手包。
+
+> Two **low-level commands** sit outside the daily loop, for diagnosis: `show` (dump the current SSOT for inspection) and `wrap-external <content> --source <id>` (wrap a piece of external text from the command line - same effect as the rendering-layer exit).
 
 ## 模型适配（注册表驱动，存储层不变）
 - 注册表：`<project>/.workbuddy/context/model_adapters.json`（内置 workbuddy / claude / gpt / raw）。
@@ -139,6 +141,7 @@ display_name: "context-persistence"
 
 ## 版本沿革
 
+- **1.3.1**（2026-10-20）：文档漂移修补，无行为变化。补两条底层命令说明（`show` / `wrap-external`）——命令清单与引擎逐条对账发现引擎 20 个顶层命令、文档原只覆盖 18 个；身份路径统一为 `<宿主家目录>/.workbuddy/…`。
 - **1.3.0**（2026-10-20）：修可移植性。此前新环境装到的只是「壳」——命令全部依赖每项目引擎，而技能对引擎来源缺乏可执行指引，新环境只能猜结构重建。本版把「环境前置」重写为**引擎三分支**（有引擎→用 / 拿得到→**部署不重建** / 拿不到→按契约手工兜底）；新增「**任务层契约**」节，把 `task_state.json` 字段全貌、条目结构、flush 物理动作、文件格式内嵌进技能，兜底从「猜」变「照抄」；兜底条款扩为两级并明确**严禁照说明书重写引擎**；权限链表述改为不依赖特定机器路径的角色判定。注入契约 / 体量边界 / 记忆层规则 / 三个动作 / 外部通道等机制条款一字未动。
 - **1.2.0**（2026-10-19）：补 G2 记忆层分层声明（〔常驻〕/〔按需〕决定注入面）；补 `[A]/[C]` 有 cap、`[B]/[D]` 无 cap 的体量边界；补 `k_lint` / `measure_context` 两条纪律；「三个钩子」更名「三个动作」以避开与宿主 hooks 的符号撞车。
 - **1.1.0**（2026-10-16）：新增模型适配注册表（`model_adapters.json`）与外部内容通道（采集 / 单一咽喉点包裹为 `<external_content trust="untrusted">`）。
