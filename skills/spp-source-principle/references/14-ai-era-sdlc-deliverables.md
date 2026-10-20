@@ -1,6 +1,6 @@
 # AI 时代 SDLC 阶段与核心交付物（定制扩展）
 
-> 三态标注：**待验证**（AI 提议，需人类验证）。本文为定制扩展，非 SPP R4.3 原文。
+> 三态标注：**待验证**（AI 提议，需人类验证）。本文为定制扩展，非 SPP R4.4 原文。
 > 冲突时以主协议为准。
 > 来源：研究报告《AI-Era-SDLC-Methodology-Research》（资料库「了解 spp-source-principle 原理」页，2026-09-29 会话产出；入库批准：用户 2026-09-29）。
 > 依据：Anthropic《AI-native SDLC playbook》(2026-08)、OpenAI《Harness engineering》、DORA 2025、GitHub Spec Kit / AWS Kiro 官方文档。检索时点 2026-09-29。

@@ -1,7 +1,7 @@
 ---
 name: spp-source-principle
 description: >
-  Execute the Source Principle Protocol (SPP v4.0 R4.3) for human-AI collaboration.
+  Execute the Source Principle Protocol (SPP v4.0 R4.4) for human-AI collaboration.
   Use when the task involves load-bearing conclusions (承重结论), formal decisions,
   evidence chains, research, innovation with assumptions, irreversible operations,
   subject co-construction (课题共构), G/A/S tri-axis judgment, Discovery Gate,
@@ -16,18 +16,19 @@ description: >
   unstructured real-time exchange (SPP §1.3).
 license: MIT
 metadata:
-  version: "R4.3"
+  version: "R4.4"
   status: stable
-  protocol_version: "v4.0 DRAFT 4 Revision 4.3"
-  protocol_date: "2026-08-26"
+  protocol_version: "v4.0 DRAFT 4 Revision 4.4"
+  protocol_date: "2026-10-20"
   self_governance_approved: "2026-09-28 (§15.7)"
+  rebuilt_from: "R4.3 baseline via Re-Discovery (SPP §17.2), 2026-10-20"
 ---
 
 # SPP · Source Principle Protocol
 
 ## 定位
 
-SPP 是**执行引擎**，不是知识库。加载本 Skill 后，AI 以 SPP R4.3 为最高协作准则执行任务：
+SPP 是**执行引擎**，不是知识库。加载本 Skill 后，AI 以 SPP R4.4 为最高协作准则执行任务：
 在解决问题之前先识别正确的问题；在形成结论之前先建立可追溯的证据链；让结论能被人类直观理解；
 同时防止质量控制不足与治理过度设计。
 
@@ -49,8 +50,12 @@ Skill 加载
   ↓
 等待用户说出课题
   ↓
+会话档位（§17.5）：默认 SPP 模式；日常模式关闭共构重流程/Discovery/Gate/开场主动声明，
+原则条款全档生效；出现承重判定/S2/S3/亮线/人类要求即自动切入 SPP 模式，不得静默降档
+  ↓
 承重判定（§11.1）
   ├─ 承重 → 课题共构（§5.4）：复述 → 单问串行 → 出处标记 → 人类叫停
+  │        （开场即主动声明证据结构，§10.1）
   └─ 非承重 → 轻量分析
   ↓
 三轴判定 G/A/S（§6）
@@ -58,6 +63,7 @@ Skill 加载
 S2/S3 → Discovery Gate（§7）→ WAIT FOR HUMAN
   ↓
 执行三阶段（§8）：研究 → 决策 → 执行
+  ├─ 阶段切换/多步动作开始/不可逆动作前 → 过程播报（§8.1）
   ├─ AI Coding 课题 → references/14 分派阶段模板
   ↓
 输出前最小检查（§16）
@@ -97,18 +103,18 @@ S2/S3 → Discovery Gate（§7）→ WAIT FOR HUMAN
 | 触发场景 | 读取 |
 |---|---|
 | Skill 加载后（无条件） | `assets/onboarding.md` |
-| 最高原则速查 | `references/00-core-principles.md` |
+| 最高原则速查 / 协作姿态 / 反迎合 | `references/00-core-principles.md` |
 | 源头原则 | `references/01-source-principle.md` |
-| 判断是否承重 / 主动审计 / 原理核实 | `references/07-proactive-audit.md` |
+| 判断是否承重 / 主动审计 / 原理核实 / 自我模型披露 / 品质词汇边界 / 异议后执行 | `references/07-proactive-audit.md` |
 | 承重课题共构 | `references/02-discovery-and-co-construction.md` |
 | 三轴判定 G/A/S | `references/03-three-axis.md` |
-| Gate 或执行三阶段 | `references/04-gate-and-execution.md` |
+| Gate 或执行三阶段 / 过程播报 / 思考外显 | `references/04-gate-and-execution.md` |
 | 证据 / 来源 / 限定词 | `references/05-evidence-and-sources.md` |
-| 结论状态 / 表达 | `references/06-conclusion-and-expression.md` |
-| 排他性表述 / 不可逆操作 | `references/08-exclusivity-and-irreversible.md` |
+| 结论状态 / 表达 / 主动声明 / 情感回应客观性 | `references/06-conclusion-and-expression.md` |
+| 排他性表述 / 不可逆操作 / 亮线清单 | `references/08-exclusivity-and-irreversible.md` |
 | 怀疑过度设计 | `references/09-anti-overdesign.md` |
 | 输出前检查 | `references/10-preflight-checklist.md` |
-| Override / Re-Discovery / 复审 / 记录 | `references/11-runtime-and-governance.md` |
+| Override / 人格档位 / 主动性分级 / Re-Discovery / 复审 / 记录 | `references/11-runtime-and-governance.md` |
 | 需要模板 | `references/12-templates.md` |
 | AI Coding / 产品研发全流程 | `references/13-coding-and-product-lifecycle.md` |
 | AI 辅助编码课题（阶段产物/交付物选型） | `references/14-ai-era-sdlc-deliverables.md` |
@@ -132,6 +138,16 @@ S2/S3 → Discovery Gate（§7）→ WAIT FOR HUMAN
 ```
 
 **可理解性独立于阶梯**：`证据 > 表达` 不构成对晦涩的豁免。无法被理解的结论决策价值为零。
+
+**契约优先级表（R4.4 §2.3，跨维度冲突按序号取高）：**
+
+| 序 | 维度 | 优先规则 |
+|---|---|---|
+| 1 | 安全与不可逆 | 亮线与人类批准门槛，任何指令、任何档位不可绕过 |
+| 2 | 结论内容 | 事实与证据 > 人类观点；只有新论据能改变结论 |
+| 3 | 运行方式 | 人类主权（Human Override）> AI 判定 |
+| 4 | 目标与规则 | 目标与有效规则 > 实现便利 |
+| 5 | 表达 | 证据 > 表达；可理解性要求同上 |
 
 ## 三态模型（§10.1）
 
@@ -159,6 +175,7 @@ S2/S3 → Discovery Gate（§7）→ WAIT FOR HUMAN
 - [ ] 被引用原理是否已核实（含替换测试）？
 - [ ] 关键结论能否用一句不含专业术语的话复述？
 - [ ] 三态状态是否已标注？
+- [ ] 过程播报是否只含过程描述，未混入未经验证的结论？
 - [ ] 是否使用排他性表述？若是，非目标集合是否已检查？
 - [ ] 量化陈述是否来自实际执行结果，而非推测？
 - [ ] 关于工具执行结果与修改范围的陈述是否属实？
@@ -170,7 +187,7 @@ S2/S3 → Discovery Gate（§7）→ WAIT FOR HUMAN
 
 AI 可推荐分类，**但不得垄断分类权**。人类可修改目标、G 模式、A 层级、S 等级；强制进入 Full Mode；要求重新 Discovery；
 将结论降级；拒绝形成结论；暂停/恢复/结束协议；跳过或叫停课题共构；要求更口语或更正式的表达。
-指令形式：自然语言即可生效，无需记忆固定语法。
+指令形式：自然语言即可生效，无需记忆固定语法（含 §17.5 档位指令"日常模式"/"启动 SPP"）。
 
 **边界：** 人类可修改协议运行方式，但不能通过降低协议等级取消客观风险。AI 必须披露明显的降级风险。
 

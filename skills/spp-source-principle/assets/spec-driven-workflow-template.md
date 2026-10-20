@@ -1,6 +1,6 @@
 # Spec-Driven 编码工作流模板（定制扩展 · SDD × SPP 融合）
 
-> 三态标注：**待验证**（AI 提议，需人类验证）。本文为定制扩展，非 SPP R4.3 原文。冲突时以主协议为准。
+> 三态标注：**待验证**（AI 提议，需人类验证）。本文为定制扩展，非 SPP R4.4 原文。冲突时以主协议为准。
 > 来源：资料库 draft-02（「了解 spp-source-principle 原理」页，2026-09-29 会话产出；入库批准：用户 2026-09-29）。
 > 依据：GitHub Spec Kit 官方文档、AWS Kiro、Anthropic《AI-native SDLC playbook》、OpenAI Codex Best Practices。检索时点 2026-09-29。
 > 定位：`assets/prd-template.md` 是产品文档层模板；本文件是编码执行层工作流模板（对接 GitHub Spec Kit / AWS Kiro / Claude Code plan mode 的通用形态）。
