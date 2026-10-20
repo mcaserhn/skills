@@ -9,13 +9,13 @@
 
 **谁该用** — 把 AI 用在架构选型、合规审计、研究结论、方案评审这类「错了要付代价」场景的人；要把中文或英文文本对外发出去、不希望被读成 AI 生成的人；手里已经攥着一个方案、想在被别人挑刺之前先自己过一遍的人；以及经常换模型、或同一个任务要跨好几天断续接着做，受不了每次开场从零复述背景的人。
 
-**最小上手路径** — `git clone` 本仓库 → 把 `skills/<name>/` 整个目录拷进你的客户端 skills 目录 → 对话里说一句「启动 SPP」、「去掉 AI 味儿」、「毒舌陪练」或「恢复上下文」。除 `context-persistence` 需先按 `engine/DEPLOY.md` 部署引擎（见下注）外，无依赖、无 API key、无需配置。
+**最小上手路径** — `git clone` 本仓库 → 把 `skills/<name>/` 整个目录拷进你的客户端 skills 目录 → 对话里说一句「启动 SPP」、「去掉 AI 味儿」、「毒舌陪练」或「恢复上下文」。除 `context-persistence` 需把随附引擎部署进项目才可用完整命令（见下注）外，零第三方依赖、无 API key、无需配置。
 
 **What it solves** — Pointing AI at work that actually ships leaves three gaps: **verifiability**, **not sounding machine-written**, and **surviving challenge**. `spp-source-principle` covers the first — load-bearing conclusions must carry provenance, must be tagged confirmed vs. unverified, and irreversible operations must stop for human sign-off. `de-ai-flavor` covers the second — stripping "AI flavor" from LLM output, in Chinese and English. `devils-advocate` covers the third — adversarial review of an already-formed plan, reporting only the risks that cross a load-bearing threshold and backing off automatically once its critiques go unused; it earns its keep through procedure, not harshness. One more foundation layer: `context-persistence` keeps context from being lost — when switching models or resuming the same task days later, it injects a KV-cache-friendly static prefix plus status bar, so a session resumes instead of restarting from a fresh briefing.
 
 **Who it's for** — Anyone using AI on architecture choices, compliance, research findings, or design reviews, where being wrong costs real money; anyone publishing Chinese or English text that must not read as AI-generated; anyone holding a finished plan who wants to red-team it before somebody else does; and anyone who keeps switching models or spreads one task across days and is tired of re-explaining the background from scratch at the start of every session.
 
-**How to start** — `git clone` this repo → copy the whole `skills/<name>/` directory into your client's skills directory → say "启动 SPP", "去掉 AI 味儿", "毒舌陪练" or "恢复上下文" in chat. No dependencies, no API key, no configuration — except `context-persistence`, whose engine is deployed per `engine/DEPLOY.md` (see note below).
+**How to start** — `git clone` this repo → copy the whole `skills/<name>/` directory into your client's skills directory → say "启动 SPP", "去掉 AI 味儿", "毒舌陪练" or "恢复上下文" in chat. Zero third-party dependencies, no API key, no configuration — except `context-persistence`, whose bundled engine must be deployed into a project for its full command set (see note below).
 
 ---
 
@@ -34,11 +34,11 @@
 | [`spp-source-principle`](skills/spp-source-principle/) | 源头原则协议（SPP v4.0 R4.3）执行引擎——承重结论判定、课题共构、证据链与三态治理、G/A/S 三轴、不可逆操作门禁 | R4.3 | stable | 27 |
 | [`de-ai-flavor`](skills/de-ai-flavor/) | 去除 LLM 输出的「AI 味儿」（中英双语）——双语禁词表 + 中英**各自**的篇章/句法层规则 + **各自的**「不许改」保护清单 + 格式与残留标记清扫 + 常驻人设片段 + 保真护栏 + **评估层**（AI-Check 取证打分 + 确定性 Python linter，只诊断不改写） + **判定边界**（上下文级排除 + 样本优先） | 1.6.2 | stable | 16 |
 | [`devils-advocate`](skills/devils-advocate/) | 毒舌陪练 / 反方批判者模式——给已经成形的想法做对抗性检验：零奉承但不零确认、阈值制（只报跨过「承重线」的风险且无下限）、三档强度、缺参数单列、挑刺未被采纳即自动降档、模式边界 | 1.0.0 | stable | 1 |
-| [`context-persistence`](skills/context-persistence/) | 跨模型 / 跨时间上下文持久化（KV Cache 友好注入）——A 静态前缀 / B 状态栏 / C 参考层 / D 外部来源四通道契约，记忆层分层声明（〔常驻〕注入 / 〔按需〕只列名）、三个动作（开场 layout / 每回合末 capture / 结束 flush+export）、模型适配注册表、外部内容单一咽喉点统一包裹为不可信数据；**引擎三分支**（有引擎→用 / 拿得到→部署不重建 / 拿不到→按任务层契约手工兜底）与内嵌 `task_state.json` 字段契约 | 1.3.0 | stable | 1 |
+| [`context-persistence`](skills/context-persistence/) | 跨模型 / 跨时间上下文持久化（KV Cache 友好注入）——A 静态前缀 / B 状态栏 / C 参考层 / D 外部来源四通道契约，记忆层分层声明（〔常驻〕注入 / 〔按需〕只列名）、三个动作（开场 layout / 每回合末 capture / 结束 flush+export）、模型适配注册表、外部内容单一咽喉点统一包裹为不可信数据；**引擎三分支**（有引擎→用 / 拿得到→部署不重建 / 拿不到→按任务层契约手工兜底）与内嵌 `task_state.json` 字段契约；**引擎随技能发布**（`engine/` 子目录，纯 Python 3 标准库） | 1.3.0 | stable | 6 |
 
 完整目录（含自动统计的描述、版本、文件数）见 [`CATALOG.md`](CATALOG.md)，由 `scripts/build-catalog.py` 从各 skill 的 frontmatter 生成。
 
-> **注**：`context-persistence` 描述的是**协议与行为规范**；它驱动的引擎（`context_manager.py` / `k_lint.py` / `measure_context.py`）随本仓库 [`engine/`](engine/) 提供——这是**只读分发副本**，部署进目标项目的 `.workbuddy/context/` 即可（三步见 `engine/DEPLOY.md`）。没有引擎时，可按其 `SKILL.md` 的「任务层契约」节手工执行（字段全貌已内嵌，兜底从猜变成照抄）。
+> **注**：`context-persistence` 描述的是**协议与行为规范**；它驱动的引擎随技能发布在 [`skills/context-persistence/engine/`](skills/context-persistence/engine/)——**只读分发副本**，部署进目标项目的 `.workbuddy/context/` 即可（三步见 `engine/DEPLOY.md`）。没有引擎时，可按其 `SKILL.md` 的「任务层契约」节手工执行（字段全貌已内嵌，兜底从猜变成照抄）。
 
 ### 目录结构
 
@@ -60,6 +60,13 @@
     ├── de-ai-flavor/
     ├── devils-advocate/
     └── context-persistence/
+        ├── SKILL.md
+        └── engine/            # 执行体（随技能发布的只读分发副本）
+            ├── context_manager.py    #   主引擎（纯 Python 3 标准库）
+            ├── k_lint.py             #   K 面一致性自检
+            ├── measure_context.py    #   只读体量盘点仪
+            ├── model_adapters.json   #   模型适配注册表
+            └── DEPLOY.md             #   三步部署到任意项目
 ```
 
 ### 安装
@@ -75,10 +82,13 @@ cp -r /tmp/skills/skills/de-ai-flavor        ~/.workbuddy/skills/
 cp -r /tmp/skills/skills/devils-advocate     ~/.workbuddy/skills/
 cp -r /tmp/skills/skills/context-persistence ~/.workbuddy/skills/
 
-# context-persistence 的引擎（可选，但装了才能用完整命令）；逐步说明见 engine/DEPLOY.md：
+# context-persistence 的引擎（随技能一起被拷进来了；装了才能用完整命令）。
+# 引擎要放进【项目】的 .workbuddy/context/ 才生效——装在 skills 目录里那一份不参与运行：
 mkdir -p <你的项目>/.workbuddy/context
-cp /tmp/skills/engine/context_manager.py /tmp/skills/engine/k_lint.py \
-   /tmp/skills/engine/measure_context.py /tmp/skills/engine/model_adapters.json \
+cp ~/.workbuddy/skills/context-persistence/engine/context_manager.py \
+   ~/.workbuddy/skills/context-persistence/engine/k_lint.py \
+   ~/.workbuddy/skills/context-persistence/engine/measure_context.py \
+   ~/.workbuddy/skills/context-persistence/engine/model_adapters.json \
    <你的项目>/.workbuddy/context/
 python <你的项目>/.workbuddy/context/context_manager.py --ws <你的项目> init
 
@@ -93,10 +103,13 @@ Copy-Item -Recurse -Force "$env:TEMP\skills\skills\de-ai-flavor"        "$env:US
 Copy-Item -Recurse -Force "$env:TEMP\skills\skills\devils-advocate"     "$env:USERPROFILE\.workbuddy\skills\"
 Copy-Item -Recurse -Force "$env:TEMP\skills\skills\context-persistence" "$env:USERPROFILE\.workbuddy\skills\"
 
-# context-persistence 的引擎（可选，但装了才能用完整命令）；逐步说明见 engine/DEPLOY.md：
+# context-persistence 的引擎（随技能一起被拷进来了；装了才能用完整命令）。
+# 引擎要放进【项目】的 .workbuddy\context\ 才生效——装在 skills 目录里那一份不参与运行：
 New-Item -ItemType Directory -Force "<你的项目>\.workbuddy\context"
-Copy-Item "$env:TEMP\skills\engine\context_manager.py","$env:TEMP\skills\engine\k_lint.py",`
-          "$env:TEMP\skills\engine\measure_context.py","$env:TEMP\skills\engine\model_adapters.json" `
+Copy-Item "$env:USERPROFILE\.workbuddy\skills\context-persistence\engine\context_manager.py",`
+          "$env:USERPROFILE\.workbuddy\skills\context-persistence\engine\k_lint.py",`
+          "$env:USERPROFILE\.workbuddy\skills\context-persistence\engine\measure_context.py",`
+          "$env:USERPROFILE\.workbuddy\skills\context-persistence\engine\model_adapters.json" `
           "<你的项目>\.workbuddy\context\"
 python "<你的项目>\.workbuddy\context\context_manager.py" --ws "<你的项目>" init
 ```
@@ -104,6 +117,7 @@ python "<你的项目>\.workbuddy\context\context_manager.py" --ws "<你的项�
 ### 维护约定
 
 - **单一真源**：本地 `~/.workbuddy/skills/` 是编辑真源，本仓库是发布镜像；只按脚本白名单单向同步，不反向回写
+- **发布 context-persistence 的陷阱**：`sync-from-local.py` 对白名单技能是**整目录镜像**（先删后拷）。暂存区若只放 `SKILL.md` 而漏掉 `engine/` 子目录，下一次发布会把仓库里的引擎**删掉**。发布它时暂存区必须是 `SKILL.md` + `engine/` 的完整 6 文件
 - **发布流程**：本地开发 → `python scripts/sync-from-local.py` → `python scripts/validate.py` → `python scripts/build-catalog.py` → `git commit && git push`
 - **新增 skill**：复制 `template/skill-template/` → 在本地开发 → 把目录名加入 `scripts/sync-from-local.py` 的白名单 → 走上述流程
 - **frontmatter 基线**：`name`（须等于目录名）、`description`（非空且 ≤ 1024 字符）、`license`，以及 `version` 与 `status`（顶层字段或 `metadata.` 子字段均可，目录脚本会回退查找）
@@ -111,7 +125,7 @@ python "<你的项目>\.workbuddy\context\context_manager.py" --ws "<你的项�
 
 ### 最近更新
 
-- **2026-10-20** — `context-persistence` 升版 **1.3.0**（**修可移植性**，机制条款零变化）+ 新增仓库 **`engine/`** 目录（引擎 4 文件 + `DEPLOY.md`）。缘起：一次全新环境（另一用户 / 新家目录）加载本技能后，因引擎不在发布面、技能又无内建契约，只能靠猜重建状态层。本版修三处：① 「环境前置」重写为**引擎三分支**——项目里已有引擎 → 正常用；拿得到引擎 → **部署不重建**（拷 4 文件 + `init` + `k_lint` 验证）；都拿不到 → 按契约手工兜底；② 新增「**任务层契约**」节，把 `task_state.json` 字段全貌、条目结构、flush 物理动作、文件格式**内嵌进技能**，无引擎兜底从「猜结构」变「照抄」；③ 明确**严禁照说明书重写引擎**（必然产出分叉实现，分叉一旦成为事实权威，机制就收不回去）。注入契约 / 体量边界 / 记忆层规则 / 三个动作 / 外部通道等一字未动。`engine/` 是**只读分发副本**：修机制回机制权威处，不回写本仓库。
+- **2026-10-20** — `context-persistence` 升版 **1.3.0**（**修可移植性**，机制条款零变化），**引擎随技能发布**在 `skills/context-persistence/engine/`（4 引擎文件 + `DEPLOY.md`）。缘起：一次全新环境（另一用户 / 新家目录）加载本技能后，因引擎不在发布面、技能又无内建契约，只能靠猜重建状态层。本版修三处：① 「环境前置」重写为**引擎三分支**——项目里已有引擎 → 正常用；拿得到引擎 → **部署不重建**（拷 4 文件 + `init` + `k_lint` 验证）；都拿不到 → 按契约手工兜底；② 新增「**任务层契约**」节，把 `task_state.json` 字段全貌、条目结构、flush 物理动作、文件格式**内嵌进技能**，无引擎兜底从「猜结构」变「照抄」；③ 明确**严禁照说明书重写引擎**（必然产出分叉实现，分叉一旦成为事实权威，机制就收不回去）。注入契约 / 体量边界 / 记忆层规则 / 三个动作 / 外部通道等一字未动。`engine/` 是技能目录内的**只读分发副本**：修机制回机制权威处，不回写本仓库。
 - **2026-10-19** — 新增 **`context-persistence`**（**1.2.0**）：把「换模型、隔天续同一任务时上下文不能丢」变成一套可执行契约。地基是 **KV Cache 友好注入**：上下文拆成 **A 静态前缀**（身份，写一次后字节级冻结）/ **B 状态栏**（每轮追加到对话末尾的 `<agent_status>`）/ **C 参考层**（跨会话事实 + 近期日志）/ **D 外部来源**（采集时原样存、注入时统一包裹为不可信数据）四条通道，并明令**禁止把 time / 状态 / 进度写进 system 前缀**——实测踩坑代价是 TTFT 0.5s→3-5s、账单近乎翻倍。配套四件事：**记忆层分层声明**（`## 标题 〔常驻〕` 整节注入 / `〔按需〕` 只列名，渲染唯一出口是 `render_memory_excerpt()`）；**三个动作**（开场 `layout` / 每回合末 `capture` / 结束 `flush` + `export` 生成可移植握手包）；**模型适配注册表**（workbuddy / claude / gpt / raw，新增模型只写一份 wrapper，不动存储层与核心代码）；**外部内容单一咽喉点**（采集与包裹解耦，但不给「忘记」留位置）。另含体量边界（`[A]/[C]` 有 cap、`[B]/[D]` 无 cap，压缩判据是「最坏每轮达窗口 80%」而非「数字看着大」）与一条硬教训：**装载位置与收尾纪律同等重要**——本技能曾在交付后 15 天零写入而失效，根因是只存在于不被会话收录的目录。已加入 `scripts/sync-from-local.py` 白名单与 `CATALOG.md`。
 - **2026-10-08** — 新增 **`devils-advocate`**（通用版 **1.0.0**）：一个**反方批判者 / 毒舌陪练**模式，对**已经成形**的想法、方案或判断做对抗性审查，而不是提供安慰。三条核心纪律：**零奉承但不零确认**（事实层面成立的判断必须直说——一个从不承认对方正确的批判者，其否定会退化成背景噪声）；**阈值制输出**（只报跨过「承重线」的风险，≤ 5 条且**无下限**，一条都不过线就直说「本轮无承重级问题」）；**自动降档**（连续若干轮挑刺未被采纳，即判定未被使用并主动停供）。另含三档强度（轻 / 标准 / 全力）、缺参数单列（计入未决项总数，不另开旁路）、模式边界（断言式，不适用于想法尚在概念期）。已加入 `scripts/sync-from-local.py` 白名单与 `CATALOG.md`。
 - **2026-10-08** — `de-ai-flavor` 升版 **1.6.2**（**`SKILL.md` 瘦身，功能零变化**）：入口文件由 20,957 B / 6,495 tok 压到 **13,411 B / 4,051 tok**（o200k；cl100k 4,986），**两个口径均回到自设的「SKILL.md < 5k token」上限之内**。做法全部是**搬移与去重**，不动任何触发条件、判据、规则编号或 linter：① 原「来源与许可」整章（版本沿革 + 证据引注 + 已知局限，约占入口 30%）外移 —— **证据源与逐版沿革**并入 `references/04`，**已知局限**归入 `references/10` 第 7 / 8 节（并补上 linter 的两处覆盖缺口：`05` 第 3 / 10.1 条无法正则判定、英文直引号内引文未机械排除），`SKILL.md` 只留许可 / 借鉴来源 / 证据基础 / 指针四行；② 原「三个层次」+「语言门控」+「路由表」三张各列一遍同一批文件的表**合并为一张「加载路由表」**（行 = 文件，列 = 层 / 语言 / 何时读）；③「输出前自查」由 12 条压到 7 条，与上一节重复的保真项收成一行「保真四查」指回本节。文件数不变（16）
@@ -145,11 +159,11 @@ My **personal collection of Agent Skills**. Each skill is a self-contained direc
 | [`spp-source-principle`](skills/spp-source-principle/) | Execution engine for the Source Principle Protocol (SPP v4.0 R4.3) — load-bearing conclusions, subject co-construction, evidence chains, three-state governance, G/A/S tri-axis, irreversible-operation gating | R4.3 | stable | 27 |
 | [`de-ai-flavor`](skills/de-ai-flavor/) | Removes "AI flavor" from LLM output (Chinese + English) — bilingual banned-word lists, **parallel** Chinese and English discourse/syntax rules, **per-language** do-not-change lists, format / markup-artifact cleanup, persona snippets, fidelity guardrails, an **evaluation layer** (AI-Check forensic scoring + a deterministic Python linter; diagnose only, never rewrite), and **decision boundaries** (context-level exclusions + sample-overrides-all) | 1.6.2 | stable | 16 |
 | [`devils-advocate`](skills/devils-advocate/) | Devil's-advocate / adversarial-review mode — pressure-tests a plan you already hold: zero flattery but not zero acknowledgement, threshold-based output (only risks past the load-bearing line, with no floor), three intensity levels, missing parameters listed separately, automatic de-escalation once its critiques go unused, and explicit mode boundaries | 1.0.0 | stable | 1 |
-| [`context-persistence`](skills/context-persistence/) | Cross-model / cross-session context persistence with KV-cache-friendly injection — a four-channel contract (A static prefix / B status bar / C reference layer / D external sources), memory-layer injection declarations ([resident] injects / [on-demand] names only), three actions (layout on open / capture each turn / flush+export on close), a model-adapter registry, a single choke point that wraps all external content as untrusted data; plus an **engine three-branch check** (engine present → use it / obtainable → deploy, never rebuild / neither → hand-run the embedded task-state contract) and the embedded `task_state.json` field contract | 1.3.0 | stable | 1 |
+| [`context-persistence`](skills/context-persistence/) | Cross-model / cross-session context persistence with KV-cache-friendly injection — a four-channel contract (A static prefix / B status bar / C reference layer / D external sources), memory-layer injection declarations ([resident] injects / [on-demand] names only), three actions (layout on open / capture each turn / flush+export on close), a model-adapter registry, a single choke point that wraps all external content as untrusted data; plus an **engine three-branch check** (engine present → use it / obtainable → deploy, never rebuild / neither → hand-run the embedded task-state contract), the embedded `task_state.json` field contract, and the **engine published with the skill** (`engine/` subdirectory, Python 3 stdlib only) | 1.3.0 | stable | 6 |
 
 See [`CATALOG.md`](CATALOG.md) for the full listing (with generated descriptions, versions and file counts), produced by `scripts/build-catalog.py` from each skill's frontmatter.
 
-> **Note**: `context-persistence` is a **protocol and behaviour specification**; the engine it drives (`context_manager.py` / `k_lint.py` / `measure_context.py`) ships with this repository under [`engine/`](engine/) — a **read-only distribution copy** you deploy into a target project's `.workbuddy/context/` (three steps in `engine/DEPLOY.md`). Without the engine, its "task-state contract" section documents every field, so the fallback path is copy-not-guess.
+> **Note**: `context-persistence` is a **protocol and behaviour specification**; the engine it drives ships with the skill under [`skills/context-persistence/engine/`](skills/context-persistence/engine/) — a **read-only distribution copy** you deploy into a target project's `.workbuddy/context/` (three steps in `engine/DEPLOY.md`). Without the engine, its "task-state contract" section documents every field, so the fallback path is copy-not-guess.
 
 ### Repository layout
 
@@ -160,18 +174,6 @@ See [`CATALOG.md`](CATALOG.md) for the full listing (with generated descriptions
 ├── LICENSE                    # MIT
 ├── .gitattributes             # LF line endings locked
 ├── .gitignore
-├── engine/                   # context-persistence 的执行体（引擎 + 部署说明）
-│   ├── context_manager.py    #   主引擎（纯 Python 3 标准库）
-│   ├── k_lint.py             #   K 面一致性自检
-│   ├── measure_context.py    #   只读体量盘点仪
-│   ├── model_adapters.json   #   模型适配注册表
-│   └── DEPLOY.md             #   三步部署到任意项目
-├── engine/                   # Engine for context-persistence (execution body + deploy guide)
-│   ├── context_manager.py    #   Main engine (Python 3 stdlib only)
-│   ├── k_lint.py             #   K-surface consistency self-check
-│   ├── measure_context.py    #   Read-only volume meter
-│   ├── model_adapters.json   #   Model adapter registry
-│   └── DEPLOY.md             #   Three-step deployment to any project
 ├── template/
 │   └── skill-template/        # New-skill scaffold, copy and go
 ├── scripts/                   # Repository maintenance tools (build-time only)
@@ -183,6 +185,13 @@ See [`CATALOG.md`](CATALOG.md) for the full listing (with generated descriptions
     ├── de-ai-flavor/
     ├── devils-advocate/
     └── context-persistence/
+        ├── SKILL.md
+        └── engine/            # Execution body (read-only distribution copy)
+            ├── context_manager.py    # Main engine (Python 3 stdlib only)
+            ├── k_lint.py             # K-surface consistency self-check
+            ├── measure_context.py    # Read-only volume meter
+            ├── model_adapters.json   # Model adapter registry
+            └── DEPLOY.md             # Three-step deployment to any project
 ```
 
 ### Installation
@@ -210,6 +219,7 @@ python <your-project>/.workbuddy/context/context_manager.py --ws <your-project> 
 ### Conventions
 
 - **Single source of truth**: authoring happens in the local `~/.workbuddy/skills/`; this repository is the published mirror. Sync is one-way and whitelisted - nothing is ever written back
+- **Publishing trap for `context-persistence`**: `sync-from-local.py` mirrors each whitelisted skill as a **whole directory** (delete-then-copy). If your staging copy holds only `SKILL.md` and omits the `engine/` subdirectory, the next publish **deletes the engine from this repository**. Stage the full 6 files (`SKILL.md` + `engine/`) when publishing it
 - **Publish flow**: author locally -> `python scripts/sync-from-local.py` -> `python scripts/validate.py` -> `python scripts/build-catalog.py` -> `git commit && git push`
 - **Adding a skill**: copy `template/skill-template/` -> develop locally -> add the directory name to the whitelist in `scripts/sync-from-local.py` -> run the flow above
 - **Frontmatter baseline**: `name` (must equal the directory name), `description` (non-empty, <= 1024 chars), `license`, plus `version` and `status` (either top-level keys or `metadata.` sub-keys - the repo scripts fall back between both)
@@ -217,7 +227,7 @@ python <your-project>/.workbuddy/context/context_manager.py --ws <your-project> 
 
 ### Recent changes
 
-- **2026-10-20** — `context-persistence` released as **1.3.0** (**portability fix, zero mechanism change**) + new repository **`engine/`** directory (4 engine files + `DEPLOY.md`). Origin: a fresh environment (different user, different home directory) loaded the skill and had to rebuild the state layer by guesswork, because the engine was not on the publish surface and the skill carried no inline contract. Three fixes: (1) "environment prerequisites" rewritten as an **engine three-branch check** — engine already in the project → use it; obtainable → **deploy, never rebuild** (copy 4 files + `init` + verify with `k_lint`); neither → hand-run the documented fallback; (2) a new "**task-state contract**" section embeds every `task_state.json` field, entry shape, flush mechanics and file format, turning the no-engine fallback from guesswork into copywork; (3) an explicit ban on **re-implementing the engine from the spec** (it necessarily forks the implementation, and once a fork becomes the de-facto authority the mechanism can never be pulled back). The injection contract, volume boundaries, memory-layer rules, three actions and external channel are untouched. `engine/` is a **read-only distribution copy**: mechanism changes go back to the mechanism authority, never into this repository.
+- **2026-10-20** — `context-persistence` released as **1.3.0** (**portability fix, zero mechanism change**), with the **engine published alongside the skill** at `skills/context-persistence/engine/` (4 engine files + `DEPLOY.md`). Origin: a fresh environment (different user, different home directory) loaded the skill and had to rebuild the state layer by guesswork, because the engine was not on the publish surface and the skill carried no inline contract. Three fixes: (1) "environment prerequisites" rewritten as an **engine three-branch check** — engine already in the project → use it; obtainable → **deploy, never rebuild** (copy 4 files + `init` + verify with `k_lint`); neither → hand-run the documented fallback; (2) a new "**task-state contract**" section embeds every `task_state.json` field, entry shape, flush mechanics and file format, turning the no-engine fallback from guesswork into copywork; (3) an explicit ban on **re-implementing the engine from the spec** (it necessarily forks the implementation, and once a fork becomes the de-facto authority the mechanism can never be pulled back). The injection contract, volume boundaries, memory-layer rules, three actions and external channel are untouched. `engine/` is a **read-only distribution copy** inside the skill directory: mechanism changes go back to the mechanism authority, never into this repository.
 - **2026-10-19** — new skill **`context-persistence`** (**1.2.0**): turns "context must not be lost when switching models or resuming the same task days later" into an executable contract. Its foundation is **KV-cache-friendly injection**: context is split into four channels — **A static prefix** (identity, frozen byte-for-byte after the first write), **B status bar** (an `<agent_status>` block appended to the end of the dialogue each turn), **C reference layer** (cross-session facts + recent journal), and **D external sources** (stored verbatim on capture, wrapped as untrusted data on injection) — with an explicit ban on writing time / status / progress into the system prefix; the measured cost of that mistake is TTFT 0.5s -> 3-5s and a near-doubled bill. Four mechanisms come with it: **memory-layer injection declarations** (`## Heading [resident]` injects the whole section / `[on-demand]` lists the name only, with `render_memory_excerpt()` as the single rendering exit); **three actions** (`layout` on open / `capture` at the end of every turn / `flush` on close plus `export` for a portable handoff bundle); a **model-adapter registry** (workbuddy / claude / gpt / raw — adding a model is one wrapper, never a change to the storage layer or core code); and a **single choke point for external content** (decoupling capture from wrapping, leaving no room for "forgot"). It also carries volume boundaries (`[A]/[C]` capped, `[B]/[D]` uncapped, with compression gated on "worst-case turn hits 80% of the window" rather than "the number looks big") and one hard lesson: **where a skill is loaded matters as much as wrap-up discipline** — this skill once died from 15 days of zero writes because it lived only in a directory no session ever scans. Added to the `scripts/sync-from-local.py` whitelist and `CATALOG.md`.
 - **2026-10-08** — new skill **`devils-advocate`** (general-purpose, **1.0.0**): an **adversarial-review / devil's-advocate** mode that pressure-tests an already-formed idea, plan or judgement instead of offering reassurance. Three disciplines carry it: **zero flattery but not zero acknowledgement** (when a point is factually sound it has to be said out loud — a critic who never concedes degrades into background noise); **threshold-based output** (only the risks that cross the load-bearing line, at most five and with **no floor** — if none qualify, it says so in a single line); and **automatic de-escalation** (after several rounds of unused critiques it declares itself unused and stops supplying more). It also carries three intensity levels (light / standard / full), a separate listing for missing parameters (folded into the open-items total instead of opening a side channel), and mode boundaries (assertion-style; not for ideas still in the concept stage). Added to the `scripts/sync-from-local.py` whitelist and `CATALOG.md`.
 - **2026-10-08** — `de-ai-flavor` released as **1.6.2** (**`SKILL.md` slimmed down, zero functional change**): the entry file went from 20,957 B / 6,495 tok to **13,411 B / 4,051 tok** (o200k; cl100k 4,986), bringing **both encodings back under this skill's self-imposed "SKILL.md < 5k tokens" cap**. Every change is a move or a de-duplication — no trigger condition, criterion, rule ID or linter rule was touched: (1) the former "sources and licence" chapter (version history + evidence citations + known limitations, roughly 30% of the entry) was relocated, with **evidence sources and the version-by-version history** folded into `references/04` and **known limitations** into `references/10` sections 7 / 8 — which also picks up the linter's two remaining coverage gaps (`references/05` items 3 and 10.1 cannot be decided by regex, and quotations inside straight double quotes are not mechanically excluded) — leaving `SKILL.md` with four lines for licence, borrowed sources, evidence basis and pointers; (2) the former "three layers" + "language gate" + "routing table" sections — three tables each listing the same set of files — were **merged into a single load-routing table** (rows = files, columns = layer / language / when to read); (3) "self-check before output" dropped from 12 items to 7, with the fidelity items that duplicated the preceding section folded into one "fidelity four-check" line pointing back to it. File count unchanged (16)
