@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "default": "workbuddy",
+  "adapters": {
+    "workbuddy": {
+      "display_name": "WorkBuddy / 通用 GPT 类",
+      "wrapper": "# 持久化上下文（跨模型 / 跨时间）\n\n{handoff}",
+      "injection_point": "system",
+      "notes": "作为 system 消息块注入；中文标题"
+    },
+    "claude": {
+      "display_name": "Anthropic Claude 类",
+      "wrapper": "<context>\n{handoff}\n</context>",
+      "injection_point": "user_preamble",
+      "notes": "用 <context> XML 标签包裹，置于用户首条消息之前"
+    },
+    "gpt": {
+      "display_name": "OpenAI GPT 类（英文）",
+      "wrapper": "# Project Context (persisted cross-model / cross-session)\n\n{handoff}",
+      "injection_point": "system",
+      "notes": "作为 system 消息块注入；英文标题适配"
+    },
+    "raw": {
+      "display_name": "纯握手摘要（无包裹）",
+      "wrapper": "{handoff}",
+      "injection_point": "any",
+      "notes": "仅握手摘要，便于人工粘贴或二次加工"
+    }
+  }
+}
