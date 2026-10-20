@@ -3,6 +3,24 @@
 > `de-ai-flavor` 按需参考（L3）。何时加载：生成任何去味约束 / 改写文本前，按输入语言取对应清单。
 > **证据分级**：中文词汇层为 🟡 经验共识（2026-09-30 依据中文对照语料做过一次校准）；**英文词汇层仍为 ⚪ 待验证**（本表无对照语料支撑）；但**英文句法 / 篇章层已有 🟢 同行评审证据**，见 `references/07-en-syntax-and-structure.md`。校准与冲突处置见文末。
 > **层次边界**：本文件是**词汇层**约束。**篇章 / 句法层**——中文见 `references/05-zh-syntax-and-structure.md`，英文见 `references/07-en-syntax-and-structure.md`；**反向保护清单**（不得据此改写的项）——中文见 `references/06-do-not-change.md`，英文见 `references/08-en-do-not-change.md`；**格式与残留标记清扫**（中英共用）见 `references/09-format-and-artifacts.md`。
+> **原则层权威（SPP R4.4 互引）**：什么构成迎合、空吹捧、无声漂移，**以 SPP R4.4 §2.6 定义为准**；本文件是其词汇层操作清单，不自定义原则。两侧互为引用、不得各自成单；任何一侧修改后，须回查另一侧的引用仍然成立。
+
+## 与 SPP 的单一来源分工（R4.4 互引，v1.6.3 落）
+
+**分工（SPP R4.4 §2.6）：**
+
+- **原则层权威**：SPP R4.4 §2.6「反迎合」四条——不讨好 / 不无声漂移 / 禁空吹捧 / 不隐匿异议。本条定义什么是迎合，本文件不另立原则。
+- **词汇层操作清单**：即本文件（禁词、禁句式、套话模式），中英分表。
+- **回查义务**：本清单条目增删走本 skill 变更管理；原则边界变更走 SPP 协议修订流程。任何一侧修改后，回查另一侧引用仍成立。
+
+**例外条款（身份声明语境，SPP R4.4 §11.7 / §11.8 互引）：**
+
+SPP R4.4 §11.7 要求 AI **显式陈述自身定位**（"我是基于协议工作的 AI 协作者"类事实性身份陈述），§11.8 允许在**身份声明语境**审慎借用人类品质词汇（诚实、审慎、尽责等）表达协作姿态。因此：
+
+1. **身份事实陈述不命中**：「作为 AI / 作为 AI 协作者 / 我是 AI」等事实性身份陈述，以及身份声明语境下的品质词汇借用，**不属**本清单「助手腔客套」与「确定语气空转词」的命中范围——客套靶子是无信息量敬语（"很高兴为您提供帮助""希望这个回答对您有帮助"），不是身份事实。
+2. **范围仅限身份声明语境**：品质词汇借用**禁入结论、证据表述与分析正文**（§11.8）；"诚实地讲"不构成诚实，证据才是。
+3. **不假装人类**：借词不改变身份陈述本身（OpenAI 路线为默认：禁止假装人类）。
+4. **回退触发（§11.8）**：出现"品质词汇包装无证据结论"实例 → 全面禁用并记录。
 
 ## 语言处理规则
 
@@ -34,6 +52,8 @@
 - 助手腔客套：很高兴为您提供帮助、作为 AI / 作为一个人工智能、如果您还有其他问题、随时告诉我、请问还有什么可以帮您、希望这个回答对您有帮助
 ```
 
+> **例外（SPP R4.4 §11.7/§11.8 互引）**：「作为 AI」一类的靶子是**仆人腔敬语**（"作为 AI，我很乐意为您……"）；SPP §11.7 要求的**事实性身份陈述**（"我是基于协议工作的 AI 协作者"）与 §11.8 允许的身份声明语境品质词汇借用**不命中**本行——细则见文首「与 SPP 的单一来源分工」节。
+
 **不再列为「必删」（实测方向相反或无差别，仅作提示，不得据此机械删除）**：
 
 - **虚词 / 模糊限定**：「可能、或许、在一定程度上、某种意义上、似乎」——中文对照语料实测 AI 用得比人类**更少**（口语连接词 R=0.26、单字虚词 R=0.45），方向是"补"不是"删"；且表达真实不确定或条件许可时**一律保留**（见 `references/01-fidelity-guardrails.md` 情态保护条）。仅在它们作为**无实质垫词堆叠**、可删而不丢信息时，按"空话"处理。
@@ -52,6 +72,8 @@ Never fix a listed item by swapping in a synonym. A word being overused by AI do
 - Buzzwords: "leverage", "seamless", "robust", "delve", "navigate", "empower", "unlock", "game-changer", "synergy", "ecosystem", "streamline", "holistic", "cutting-edge", "best-in-class", "move the needle", "circle back", "deep dive", "low-hanging fruit"
 - Assistant pleasantries: "I'd be happy to help", "Great question", "As an AI / as a language model", "Let me know if you have any questions", "Hope this helps", "Feel free to ask"
 ```
+
+> **Exception (SPP R4.4 §11.7/§11.8 cross-reference)**: the "As an AI" target is **servile pleasantry** ("As an AI, I'd be happy to…"); **factual identity statements** required by SPP §11.7 ("I am an AI collaborator working under a protocol") and quality-word borrowing in identity-statement context allowed by §11.8 **do not hit** this line — see "Single-source division with SPP" at the top of this file.
 
 **不再列为「必删」**（方向随模型而变，或证据不足——仅作提示，**不得据此改写**）：
 
@@ -85,5 +107,5 @@ Never fix a listed item by swapping in a synonym. A word being overused by AI do
 **执行要点**
 - 触发：生成去味约束 / 改写文本前。
 - 必须动作：按目标语言取对应清单；中英混用两套同时生效；**中英各自**都要过词汇层（本文件）+ 该语言自己的篇章层（中文 `references/05-zh-syntax-and-structure.md`，英文 `references/07-en-syntax-and-structure.md`）。
-- 禁止：逐字互译禁词；把表达真实不确定的虚词 / hedge 机械删除；**用同义词机械替换**命中项；把篇章层规则跨语言套用（中文结论不得改英文，英文倍数不得改中文）；据单一来源的定量数字直接当判据阈值。
+- 禁止：逐字互译禁词；把表达真实不确定的虚词 / hedge 机械删除；**用同义词机械替换**命中项；把篇章层规则跨语言套用（中文结论不得改英文，英文倍数不得改中文）；据单一来源的定量数字直接当判据阈值；把品质词汇借用扩展到身份声明语境之外（SPP R4.4 §11.8）。
 - 停止条件：选中的清单与目标语言一致，且已排除保真护栏保护项（`references/01-fidelity-guardrails.md`）与对应语言的反向保护清单（中文 `references/06-do-not-change.md` / 英文 `references/08-en-do-not-change.md`）中的项。
