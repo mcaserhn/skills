@@ -205,11 +205,14 @@ cp -r /tmp/skills/skills/de-ai-flavor        ~/.workbuddy/skills/
 cp -r /tmp/skills/skills/devils-advocate     ~/.workbuddy/skills/
 cp -r /tmp/skills/skills/context-persistence ~/.workbuddy/skills/
 
-# Engine for context-persistence (optional, but required for the full command set);
-# step-by-step guide in engine/DEPLOY.md:
+# Engine for context-persistence (it came along with the skill above; required
+# for the full command set). The engine has to live in the PROJECT's
+# .workbuddy/context/ to run - the copy under skills/ does not:
 mkdir -p <your-project>/.workbuddy/context
-cp /tmp/skills/engine/context_manager.py /tmp/skills/engine/k_lint.py \
-   /tmp/skills/engine/measure_context.py /tmp/skills/engine/model_adapters.json \
+cp ~/.workbuddy/skills/context-persistence/engine/context_manager.py \
+   ~/.workbuddy/skills/context-persistence/engine/k_lint.py \
+   ~/.workbuddy/skills/context-persistence/engine/measure_context.py \
+   ~/.workbuddy/skills/context-persistence/engine/model_adapters.json \
    <your-project>/.workbuddy/context/
 python <your-project>/.workbuddy/context/context_manager.py --ws <your-project> init
 
