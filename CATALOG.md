@@ -5,7 +5,7 @@
 
 | Skill | Description | Version | Status | Files |
 |---|---|---|---|---|
-| [`context-persistence`](skills/context-persistence/) | 跨模型/跨时间统一上下文持久化，并按 KV Cache 友好布局注入。开场恢复背景/目标/进度，会话中记录决策与进度，结束写日志；任意模型切换或隔天复用都能续上。当用户在多个模型之间切换、隔天继续同一任务、或需要恢复「我们上次做到哪 / ... | 1.3.0 | stable | 6 |
+| [`context-persistence`](skills/context-persistence/) | 跨模型/跨时间统一上下文持久化，并按 KV Cache 友好布局注入。开场恢复背景/目标/进度，会话中记录决策与进度，结束写日志；任意模型切换或隔天复用都能续上。当用户在多个模型之间切换、隔天继续同一任务、或需要恢复「我们上次做到哪 / ... | 1.3.1 | stable | 6 |
 | [`de-ai-flavor`](skills/de-ai-flavor/) | Remove "AI flavor" (AI 味儿) from LLM outputs in both conversational replies and document generation, for Chinese AND English text. Covers word-level ... | 1.6.2 | stable | 16 |
 | [`devils-advocate`](skills/devils-advocate/) | 毒舌陪练 / 反方批判者模式。当对方提出想法、方案、计划或判断时，不奉承、不铺垫，只列出跨过「承重线」的风险（≤5 ... | 1.0.0 | stable | 1 |
 | [`spp-source-principle`](skills/spp-source-principle/) | Execute the Source Principle Protocol (SPP v4.0 R4.3) for human-AI collaboration. Use when the task involves load-bearing conclusions (承重结论), formal ... | R4.3 | stable | 27 |
