@@ -1,6 +1,6 @@
 # Source Principle 源头原则（SPP §3）
 
-> 来源：SPP v4.0 R4.3 §3
+> 来源：SPP v4.0 R4.4 §3
 > 本文件为原文引用，未做摘要改写。冲突时以主协议为准。
 
 ## 3. Source Principle（源头原则）
