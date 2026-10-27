@@ -9,13 +9,13 @@
 
 **谁该用** — 把 AI 用在架构选型、合规审计、研究结论、方案评审这类「错了要付代价」场景的人；要把中文或英文文本对外发出去、不希望被读成 AI 生成的人；手里已经攥着一个方案、想在被别人挑刺之前先自己过一遍的人；以及经常换模型、或同一个任务要跨好几天断续接着做，受不了每次开场从零复述背景的人。
 
-**最小上手路径** — `git clone` 本仓库 → 把 `skills/<name>/` 整个目录拷进你的客户端 skills 目录 → 对话里说一句「启动 SPP」、「去掉 AI 味儿」、「毒舌陪练」或「恢复上下文」。除 `context-persistence` 需把随附引擎部署进项目才可用完整命令（见下注）外，零第三方依赖、无 API key、无需配置。
+**最小上手路径** — `git clone` 本仓库 → 把 `skills/<name>/` 整个目录拷进你的客户端 skills 目录 → 对话里说一句「启动 SPP」、「去掉 AI 味儿」、「毒舌陪练」、「恢复上下文」或「ADEN 命名」。除 `context-persistence` 需把随附引擎部署进项目才可用完整命令（见下注）外，零第三方依赖、无 API key、无需配置。
 
 **What it solves** — Pointing AI at work that actually ships leaves three gaps: **verifiability**, **not sounding machine-written**, and **surviving challenge**. `spp-source-principle` covers the first — load-bearing conclusions must carry provenance, must be tagged confirmed vs. unverified, and irreversible operations must stop for human sign-off. `de-ai-flavor` covers the second — stripping "AI flavor" from LLM output, in Chinese and English. `devils-advocate` covers the third — adversarial review of an already-formed plan, reporting only the risks that cross a load-bearing threshold and backing off automatically once its critiques go unused; it earns its keep through procedure, not harshness. One more foundation layer: `context-persistence` keeps context from being lost — when switching models or resuming the same task days later, it injects a KV-cache-friendly static prefix plus status bar, so a session resumes instead of restarting from a fresh briefing.
 
 **Who it's for** — Anyone using AI on architecture choices, compliance, research findings, or design reviews, where being wrong costs real money; anyone publishing Chinese or English text that must not read as AI-generated; anyone holding a finished plan who wants to red-team it before somebody else does; and anyone who keeps switching models or spreads one task across days and is tired of re-explaining the background from scratch at the start of every session.
 
-**How to start** — `git clone` this repo → copy the whole `skills/<name>/` directory into your client's skills directory → say "启动 SPP", "去掉 AI 味儿", "毒舌陪练" or "恢复上下文" in chat. Zero third-party dependencies, no API key, no configuration — except `context-persistence`, whose bundled engine must be deployed into a project for its full command set (see note below).
+**How to start** — `git clone` this repo → copy the whole `skills/<name>/` directory into your client's skills directory → say "启动 SPP", "去掉 AI 味儿", "毒舌陪练", "恢复上下文" or "ADEN 命名" in chat. Zero third-party dependencies, no API key, no configuration — except `context-persistence`, whose bundled engine must be deployed into a project for its full command set (see note below).
 
 ---
 
@@ -35,6 +35,7 @@
 | [`de-ai-flavor`](skills/de-ai-flavor/) | 去除 LLM 输出的「AI 味儿」（中英双语）——双语禁词表 + 中英**各自**的篇章/句法层规则 + **各自的**「不许改」保护清单 + 格式与残留标记清扫 + 常驻人设片段 + 保真护栏 + **评估层**（AI-Check 取证打分 + 确定性 Python linter，只诊断不改写） + **判定边界**（上下文级排除 + 样本优先） | 1.6.3 | stable | 16 |
 | [`devils-advocate`](skills/devils-advocate/) | 毒舌陪练 / 反方批判者模式——给已经成形的想法做对抗性检验：零奉承但不零确认、阈值制（只报跨过「承重线」的风险且无下限）、三档强度、缺参数单列、挑刺未被采纳即自动降档、模式边界 | 1.0.0 | stable | 1 |
 | [`context-persistence`](skills/context-persistence/) | 跨模型 / 跨时间上下文持久化（KV Cache 友好注入）——A 静态前缀 / B 状态栏 / C 参考层 / D 外部来源四通道契约，记忆层分层声明（〔常驻〕注入 / 〔按需〕只列名）、三个动作（开场 layout / 每回合末 capture / 结束 flush+export）、模型适配注册表、外部内容单一咽喉点统一包裹为不可信数据；**引擎三分支**（有引擎→用 / 拿得到→部署不重建 / 拿不到→按任务层契约手工兜底）与内嵌 `task_state.json` 字段契约；**引擎随技能发布**（`engine/` 子目录，纯 Python 3 标准库） | 1.3.1 | stable | 6 |
+| [`aden-naming-standard`](skills/aden-naming-standard/) | ADEN 命名与标识规范的装载层——七段命名式（组织前缀 / 文档类型 / 域 / 主体 / 版本 / 状态 / 语言）、受控值表、三条豁免（存量资产 / 代码脚手架 / 项目本地文档）、两个校验器（Node 权威实现 + Python 跨环境子集，作用域可切）、失败分支表（校验器跑不通怎么办 / 判不了怎么办 / 三条不许）、整改前的不可逆操作闸门 | 1.4.0 | draft | 7 |
 
 完整目录（含自动统计的描述、版本、文件数）见 [`CATALOG.md`](CATALOG.md)，由 `scripts/build-catalog.py` 从各 skill 的 frontmatter 生成。
 
@@ -59,14 +60,18 @@
 │   ├── spp-source-principle/
 │   ├── de-ai-flavor/
 │   ├── devils-advocate/
-│   └── context-persistence/
+│   ├── context-persistence/
+│   │   ├── SKILL.md
+│   │   └── engine/            # 执行体（随技能发布的只读分发副本）
+│   │       ├── context_manager.py    #   主引擎（纯 Python 3 标准库）
+│   │       ├── k_lint.py             #   K 面一致性自检
+│   │       ├── measure_context.py    #   只读体量盘点仪
+│   │       ├── model_adapters.json   #   模型适配注册表
+│   │       └── DEPLOY.md             #   三步部署到任意项目
+│   └── aden-naming-standard/
 │       ├── SKILL.md
-│       └── engine/            # 执行体（随技能发布的只读分发副本）
-│           ├── context_manager.py    #   主引擎（纯 Python 3 标准库）
-│           ├── k_lint.py             #   K 面一致性自检
-│           ├── measure_context.py    #   只读体量盘点仪
-│           ├── model_adapters.json   #   模型适配注册表
-│           └── DEPLOY.md             #   三步部署到任意项目
+│       ├── references/        # 规范正文 / 研究底稿 / 上游依据 / 符号登记处
+│       └── scripts/           # naming-lint.js（权威）+ aden_naming_lint.py（子集）
 └── third-party/               # 第三方 skill 只读副本（原样再分发，不进 CATALOG）
     ├── README.md              # 命名空间规则 + 上游提交登记表
     └── kami/                  # tw93/Kami @ 6b399e93（MIT，118 文件）
@@ -84,6 +89,7 @@ cp -r /tmp/skills/skills/spp-source-principle ~/.workbuddy/skills/
 cp -r /tmp/skills/skills/de-ai-flavor        ~/.workbuddy/skills/
 cp -r /tmp/skills/skills/devils-advocate     ~/.workbuddy/skills/
 cp -r /tmp/skills/skills/context-persistence ~/.workbuddy/skills/
+cp -r /tmp/skills/skills/aden-naming-standard ~/.workbuddy/skills/
 
 # context-persistence 的引擎（随技能一起被拷进来了；装了才能用完整命令）。
 # 引擎要放进【项目】的 .workbuddy/context/ 才生效——装在 skills 目录里那一份不参与运行：
@@ -105,6 +111,7 @@ Copy-Item -Recurse -Force "$env:TEMP\skills\skills\spp-source-principle" "$env:U
 Copy-Item -Recurse -Force "$env:TEMP\skills\skills\de-ai-flavor"        "$env:USERPROFILE\.workbuddy\skills\"
 Copy-Item -Recurse -Force "$env:TEMP\skills\skills\devils-advocate"     "$env:USERPROFILE\.workbuddy\skills\"
 Copy-Item -Recurse -Force "$env:TEMP\skills\skills\context-persistence" "$env:USERPROFILE\.workbuddy\skills\"
+Copy-Item -Recurse -Force "$env:TEMP\skills\skills\aden-naming-standard" "$env:USERPROFILE\.workbuddy\skills\"
 
 # context-persistence 的引擎（随技能一起被拷进来了；装了才能用完整命令）。
 # 引擎要放进【项目】的 .workbuddy\context\ 才生效——装在 skills 目录里那一份不参与运行：
@@ -128,6 +135,7 @@ python "<你的项目>\.workbuddy\context\context_manager.py" --ws "<你的项�
 
 ### 最近更新
 
+- **2026-10-27** — 新增 **`aden-naming-standard`**（**1.4.0**，状态 `draft`，7 文件）：把 ADEN 命名与标识规范 v1.4 做成**装载层**——七段命名式、受控值表（2 前缀 / 5 文档类型 / 9 域 / 5 状态）、三条豁免（§1.3 存量资产 / 代码脚手架 / 项目本地文档）、两个同规则不同作用域的校验器（`naming-lint.js` 权威实现含 §8.1 交叉核对，`aden_naming_lint.py` 无 Node 环境的子集，作用域可切 `generic`/`lab`）。发布前经 `darwin-skill` 做三轮 9 维评估与配对盲评（3×3 独立 judge，全部 keep、零回滚），补的是**工程性**而非规范内容：① 新增「跑不通 / 判不了时怎么办」失败分支表（校验器失败 5 行 + 判定失败 4 行，均「触发条件 → 一线修复 → 仍失败兜底」三段式，兜底带 `manual_audit` / `degraded` / `exempt_unverified` 状态标记）与「三条不许」；② 整改前加 **🔴 CHECKPOINT**（改名 / 移动属不可逆动作，须先核存量、再列「旧名 → 新名」对照等确认）与 **🛑 STOP**（校验未完成不得下合规结论）；③ 声明**路径基准**（所有 `references/`、`scripts/` 相对本 skill 根目录，命令统一用 `$HD` 展开为绝对路径）。命名式、豁免条款、校验器参数一字未动。已知边界：规范本体状态为 Draft，未进集团审批链；`PROVENANCE.md` 未随技能分发，已如实标注
 - **2026-10-20** — `spp-source-principle` 随协议升级至 **R4.4**（**Re-Discovery 重建**，27 文件，纯追加增量挂载、未新增文件）：R4.4 本体定稿（1,613 行，修订议程 8 批次 A–H 逐批 Gate），新增条款原文全部落位——§2.3 契约优先级表、§2.5 协作姿态、§2.6 反迎合（含与 `de-ai-flavor` 的单一来源清单分工）、§8.1 过程播报 + 渐进式输出护栏、§8.2 思考外显护栏、§10.1 主动声明、§10.4.4 情感客观性、§11.7 自我模型披露、§11.8 品质词汇边界护栏、§12.5 异议后执行、§13.4 不可逆操作亮线清单、§17.5 人格档位、§17.6 主动性分级护栏；入口层 wiring（执行流程图 / 路由表 / Override 指令 / 输出前最低检查）同步。四件条件引入器件只落护栏不开器件，2–4 周观察期巡检挂运行期（触发即回退并记录）。R4.3 基线 27 文件备份留档，技能封装 → GitHub 镜像单向派生
 - **2026-10-20** — `de-ai-flavor` 升版 **1.6.3**（**SPP R4.4 互引，判据与 linter 零变化**）：依 SPP R4.4 §2.6「清单分工（单一来源）」落两侧互引——原则层权威在 SPP §2.6，词汇层操作清单在本技能，修改后回查对侧；新增例外条款四条：身份声明语境下的身份事实陈述（「我是 AI 协作者」类）与品质词汇借用（诚实 / 审慎 / 尽责等）不属「助手腔客套」命中范围，范围仅限身份声明语境、禁入结论 / 证据 / 分析正文、回退触发为品质词包装无证据结论即全面禁用——该例外同时消解了「作为 AI」禁词与 SPP §11.7 身份陈述义务的表面冲突。禁词表、篇章 / 句法层规则、反向保护清单、linter 规则编号全部未动
 - **2026-10-20** — `context-persistence` 修版 **1.3.1**（**文档漂移修补**，零行为变化）：一次全仓漂移审计（catalog 重生成 diff / 引擎与机制权威逐字节对账 / 命令清单 vs 引擎 `argv` 分支逐条比 / 目录树 vs `ls-tree` / Python 版本声称核对）发现两处文档问题——引擎 20 个顶层命令中文档漏了 `show` 与 `wrap-external` 两条底层命令；② 层身份路径 `~/.workbuddy/…` 未与泛化后的环境前置统一。均已补。审计结论其余各项零漂移（引擎 4 文件与机制权威字节一致、CATALOG 重生成无 diff、目录树与实际相符、`3.8+` 声称经 `from __future__ import annotations` 核实成立）。
@@ -166,6 +174,7 @@ My **personal collection of Agent Skills**. Each skill is a self-contained direc
 | [`de-ai-flavor`](skills/de-ai-flavor/) | Removes "AI flavor" from LLM output (Chinese + English) — bilingual banned-word lists, **parallel** Chinese and English discourse/syntax rules, **per-language** do-not-change lists, format / markup-artifact cleanup, persona snippets, fidelity guardrails, an **evaluation layer** (AI-Check forensic scoring + a deterministic Python linter; diagnose only, never rewrite), and **decision boundaries** (context-level exclusions + sample-overrides-all) | 1.6.3 | stable | 16 |
 | [`devils-advocate`](skills/devils-advocate/) | Devil's-advocate / adversarial-review mode — pressure-tests a plan you already hold: zero flattery but not zero acknowledgement, threshold-based output (only risks past the load-bearing line, with no floor), three intensity levels, missing parameters listed separately, automatic de-escalation once its critiques go unused, and explicit mode boundaries | 1.0.0 | stable | 1 |
 | [`context-persistence`](skills/context-persistence/) | Cross-model / cross-session context persistence with KV-cache-friendly injection — a four-channel contract (A static prefix / B status bar / C reference layer / D external sources), memory-layer injection declarations ([resident] injects / [on-demand] names only), three actions (layout on open / capture each turn / flush+export on close), a model-adapter registry, a single choke point that wraps all external content as untrusted data; plus an **engine three-branch check** (engine present → use it / obtainable → deploy, never rebuild / neither → hand-run the embedded task-state contract), the embedded `task_state.json` field contract, and the **engine published with the skill** (`engine/` subdirectory, Python 3 stdlib only) | 1.3.1 | stable | 6 |
+| [`aden-naming-standard`](skills/aden-naming-standard/) | Loader for the ADEN naming and identifier standard — the seven-segment naming form (org prefix / doc type / domain / subject / version / status / language), controlled-value tables, three exemption classes (legacy assets / code scaffolding / project-local docs), two validators (an authoritative Node implementation plus a cross-environment Python subset with switchable scope), a failure-branch table (validator down / undecidable case / three hard bans), and an irreversible-action gate before remediation | 1.4.0 | draft | 7 |
 
 See [`CATALOG.md`](CATALOG.md) for the full listing (with generated descriptions, versions and file counts), produced by `scripts/build-catalog.py` from each skill's frontmatter.
 
@@ -190,14 +199,18 @@ See [`CATALOG.md`](CATALOG.md) for the full listing (with generated descriptions
 │   ├── spp-source-principle/
 │   ├── de-ai-flavor/
 │   ├── devils-advocate/
-│   └── context-persistence/
+│   ├── context-persistence/
+│   │   ├── SKILL.md
+│   │   └── engine/            # Execution body (read-only distribution copy)
+│   │       ├── context_manager.py    # Main engine (Python 3 stdlib only)
+│   │       ├── k_lint.py             # K-surface consistency self-check
+│   │       ├── measure_context.py    # Read-only volume meter
+│   │       ├── model_adapters.json   # Model adapter registry
+│   │       └── DEPLOY.md             # Three-step deployment to any project
+│   └── aden-naming-standard/
 │       ├── SKILL.md
-│       └── engine/            # Execution body (read-only distribution copy)
-│           ├── context_manager.py    # Main engine (Python 3 stdlib only)
-│           ├── k_lint.py             # K-surface consistency self-check
-│           ├── measure_context.py    # Read-only volume meter
-│           ├── model_adapters.json   # Model adapter registry
-│           └── DEPLOY.md             # Three-step deployment to any project
+│       ├── references/        # Standard text / research draft / upstream basis / glossary
+│       └── scripts/           # naming-lint.js (authoritative) + aden_naming_lint.py (subset)
 └── third-party/               # Vendored third-party skills (verbatim, not in CATALOG)
     ├── README.md              # Namespace rules + upstream commit registry
     └── kami/                  # tw93/Kami @ 6b399e93 (MIT, 118 files)
@@ -213,6 +226,7 @@ cp -r /tmp/skills/skills/spp-source-principle ~/.workbuddy/skills/   # WorkBuddy
 cp -r /tmp/skills/skills/de-ai-flavor        ~/.workbuddy/skills/
 cp -r /tmp/skills/skills/devils-advocate     ~/.workbuddy/skills/
 cp -r /tmp/skills/skills/context-persistence ~/.workbuddy/skills/
+cp -r /tmp/skills/skills/aden-naming-standard ~/.workbuddy/skills/
 
 # Engine for context-persistence (it came along with the skill above; required
 # for the full command set). The engine has to live in the PROJECT's
@@ -239,6 +253,7 @@ python <your-project>/.workbuddy/context/context_manager.py --ws <your-project> 
 
 ### Recent changes
 
+- **2026-10-27** — new skill **`aden-naming-standard`** (**1.4.0**, status `draft`, 7 files): a **loader layer** for the ADEN naming and identifier standard v1.4 — the seven-segment naming form, controlled-value tables (2 prefixes / 5 doc types / 9 domains / 5 statuses), three exemption classes (§1.3 legacy assets / code scaffolding / project-local docs), and two validators sharing one rule set across switchable scopes (`naming-lint.js`, the authoritative implementation including the §8.1 cross-check, and `aden_naming_lint.py`, a subset for environments without Node, with `generic`/`lab` profiles). Before publishing it went through three rounds of `darwin-skill` 9-dimension evaluation with paired blind judging (3×3 independent judges, every round kept, zero reverts). What changed was **engineering, not content**: (1) a "what to do when it breaks / when you cannot decide" failure-branch table (5 rows for a failing validator, 4 for an undecidable case, each in trigger -> first-line fix -> last-resort fallback form, with `manual_audit` / `degraded` / `exempt_unverified` status tags) plus "three hard bans"; (2) a **🔴 CHECKPOINT** before remediation (renaming and moving are irreversible — verify the object is not legacy, then present an old-name -> new-name table and wait for sign-off) and a **🛑 STOP** (no compliance verdict may be issued before the validator returns); (3) an explicit **path basis** (every `references/` and `scripts/` path is relative to this skill's root, with commands expanded through `$HD` to absolute paths). The naming form, exemption clauses and validator parameters are untouched. Known boundaries: the standard itself is Draft and has not entered group approval, and `PROVENANCE.md` did not ship with the skill — now stated plainly instead of left as a dangling reference
 - **2026-10-20** — `spp-source-principle` moves to **R4.4** (**Re-Discovery rebuild**; 27 files, append-only incremental remount, no new files). The R4.4 protocol is final (1,613 lines, revision agenda batches A-H each through its own Gate), and every new clause is now mounted verbatim: §2.3 contract-priority table, §2.5 collaboration posture, §2.6 anti-sycophancy (with the single-source list split against `de-ai-flavor`), §8.1 progress broadcast + progressive-output guardrail, §8.2 thinking-externalization guardrail, §10.1 proactive declaration, §10.4.4 emotional objectivity, §11.7 self-model disclosure, §11.8 quality-vocabulary boundary guardrail, §12.5 post-dissent execution, §13.4 bright-line list for irreversible operations, §17.5 persona modes, §17.6 proactivity-tiers guardrail; entry-layer wiring (flow diagram / routing table / Override commands / pre-output minimum checks) is synced too. The four conditional-introduction devices land as guardrails only (no devices enabled), with a 2-4 week observation window whose triggers roll back and log on firing. The R4.3 baseline (27 files) is archived; the chain runs skill package -> GitHub mirror, one way
 - **2026-10-20** — `de-ai-flavor` released as **1.6.3** (**SPP R4.4 cross-reference; criteria and linter untouched**). Implements the §2.6 "list split (single source)" clause with two-way cross-references: principle authority lives in SPP §2.6, the operational word lists live here, and each side re-checks the other after changes. Four exception clauses added: identity-fact statements in an identity-declaration context ("I am an AI collaborator") and borrowed quality vocabulary (honest / prudent / diligent) do not fall inside the "assistant-tone pleasantries" hit range; the scope is limited to identity-declaration contexts, barred from conclusions / evidence / analysis bodies, with rollback defined as quality words wrapping an unevidenced conclusion (full ban and log). The exception simultaneously resolves the apparent conflict between the "as an AI" ban and SPP §11.7's self-model disclosure duty. Banned-word lists, discourse/syntax rules, do-not-change lists and linter rule IDs are all untouched
 - **2026-10-20** — `context-persistence` patched to **1.3.1** (**documentation-drift repair, zero behaviour change**). A repo-wide drift audit (catalog regeneration diff / engine vs mechanism authority byte comparison / every documented command vs the engine's `argv` branches / directory tree vs `ls-tree` / the Python-version claim) found two documentation gaps: the engine's 20 top-level commands were documented as 18 (`show` and `wrap-external` were missing), and layer-2's identity path `~/.workbuddy/…` had not been aligned with the generalised environment prerequisites. Both fixed; every other audit item came back clean (the 4 engine files are byte-identical to the mechanism authority, CATALOG regenerates with zero diff, the trees match reality, and the "3.8+" claim holds thanks to `from __future__ import annotations`).
