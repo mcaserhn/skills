@@ -25,7 +25,7 @@
 
 这是我的**自建 Agent Skill 集合仓库**。每个 skill 是一个独立目录，遵循 Agent Skills 规范（`SKILL.md` 为薄入口，重型内容按需加载自 `references/` 与 `assets/`），可被任意支持该规范的 AI 客户端加载。
 
-**收录边界**：只收录**本人自建**的 skill。市场安装或他人版权的 skill 一律不入库。
+**收录边界**：`skills/` 只收录**本人自建**的 skill，市场安装或他人版权的 skill 一律不入库。需要长期固定版本使用的第三方 skill 另置 [`third-party/`](third-party/)，作为**原样再分发的只读副本**——保留上游 `LICENSE`、登记精确提交号、不参与白名单同步与 `CATALOG.md` 生成，两个命名空间互不混淆。
 
 ### 收录的 Skill
 
@@ -55,18 +55,21 @@
 │   ├── validate.py            # 结构与内容自检
 │   ├── sync-from-local.py     # 本地 skills/ → 仓库（发布方向，白名单控制）
 │   └── build-catalog.py       # 生成 CATALOG.md
-└── skills/                    # 全部 skill 平铺于此，一目录一 skill
-    ├── spp-source-principle/
-    ├── de-ai-flavor/
-    ├── devils-advocate/
-    └── context-persistence/
-        ├── SKILL.md
-        └── engine/            # 执行体（随技能发布的只读分发副本）
-            ├── context_manager.py    #   主引擎（纯 Python 3 标准库）
-            ├── k_lint.py             #   K 面一致性自检
-            ├── measure_context.py    #   只读体量盘点仪
-            ├── model_adapters.json   #   模型适配注册表
-            └── DEPLOY.md             #   三步部署到任意项目
+├── skills/                    # 本人自建的 skill 平铺于此，一目录一 skill
+│   ├── spp-source-principle/
+│   ├── de-ai-flavor/
+│   ├── devils-advocate/
+│   └── context-persistence/
+│       ├── SKILL.md
+│       └── engine/            # 执行体（随技能发布的只读分发副本）
+│           ├── context_manager.py    #   主引擎（纯 Python 3 标准库）
+│           ├── k_lint.py             #   K 面一致性自检
+│           ├── measure_context.py    #   只读体量盘点仪
+│           ├── model_adapters.json   #   模型适配注册表
+│           └── DEPLOY.md             #   三步部署到任意项目
+└── third-party/               # 第三方 skill 只读副本（原样再分发，不进 CATALOG）
+    ├── README.md              # 命名空间规则 + 上游提交登记表
+    └── kami/                  # tw93/Kami @ 6b399e93（MIT，118 文件）
 ```
 
 ### 安装
@@ -153,7 +156,7 @@ MIT License（见 [`LICENSE`](LICENSE)）。
 
 My **personal collection of Agent Skills**. Each skill is a self-contained directory following the Agent Skills specification (`SKILL.md` as a thin entry point, with heavier material loaded on demand from `references/` and `assets/`), loadable by any client that supports the spec.
 
-**Inclusion policy**: only skills **I authored** live here. Marketplace-installed or third-party-copyrighted skills are never committed.
+**Inclusion policy**: `skills/` holds only skills **I authored**. Marketplace-installed or third-party-copyrighted skills are never committed there. Third-party skills that need a pinned version live under [`third-party/`](third-party/) as **verbatim redistribution copies** — upstream `LICENSE` retained, exact commit recorded, excluded from the whitelist sync and from `CATALOG.md` generation, so the two namespaces never get conflated.
 
 ### Included skills
 
@@ -183,18 +186,21 @@ See [`CATALOG.md`](CATALOG.md) for the full listing (with generated descriptions
 │   ├── validate.py            # Structure and content checks
 │   ├── sync-from-local.py     # Local skills/ -> repo (publish direction, whitelisted)
 │   └── build-catalog.py       # Generates CATALOG.md
-└── skills/                    # All skills, flat - one directory per skill
-    ├── spp-source-principle/
-    ├── de-ai-flavor/
-    ├── devils-advocate/
-    └── context-persistence/
-        ├── SKILL.md
-        └── engine/            # Execution body (read-only distribution copy)
-            ├── context_manager.py    # Main engine (Python 3 stdlib only)
-            ├── k_lint.py             # K-surface consistency self-check
-            ├── measure_context.py    # Read-only volume meter
-            ├── model_adapters.json   # Model adapter registry
-            └── DEPLOY.md             # Three-step deployment to any project
+├── skills/                    # My own skills, flat - one directory per skill
+│   ├── spp-source-principle/
+│   ├── de-ai-flavor/
+│   ├── devils-advocate/
+│   └── context-persistence/
+│       ├── SKILL.md
+│       └── engine/            # Execution body (read-only distribution copy)
+│           ├── context_manager.py    # Main engine (Python 3 stdlib only)
+│           ├── k_lint.py             # K-surface consistency self-check
+│           ├── measure_context.py    # Read-only volume meter
+│           ├── model_adapters.json   # Model adapter registry
+│           └── DEPLOY.md             # Three-step deployment to any project
+└── third-party/               # Vendored third-party skills (verbatim, not in CATALOG)
+    ├── README.md              # Namespace rules + upstream commit registry
+    └── kami/                  # tw93/Kami @ 6b399e93 (MIT, 118 files)
 ```
 
 ### Installation
