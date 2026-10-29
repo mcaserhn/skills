@@ -25,7 +25,7 @@
 
 这是我的**自建 Agent Skill 集合仓库**。每个 skill 是一个独立目录，遵循 Agent Skills 规范（`SKILL.md` 为薄入口，重型内容按需加载自 `references/` 与 `assets/`），可被任意支持该规范的 AI 客户端加载。
 
-**收录边界**：`skills/` 只收录**本人自建**的 skill，市场安装或他人版权的 skill 一律不入库。需要长期固定版本使用的第三方 skill 另置 [`third-party/`](third-party/)，作为**原样再分发的只读副本**——保留上游 `LICENSE`、登记精确提交号、不参与白名单同步与 `CATALOG.md` 生成，两个命名空间互不混淆。
+**收录边界**：公开 `skills/` 只收录**本人自建且允许公开发布**的 skill。第三方版权技能、未发布草稿和私有溯源材料不放入本仓库；如需私有留存，应放在公开仓库之外，不参与本仓库的目录、校验或发布流程。
 
 ### 收录的 Skill
 
@@ -54,7 +54,6 @@
 │   └── skill-template/        # 新 skill 脚手架，复制即用
 ├── scripts/                   # 仓库维护工具（构建期，非 skill 运行依赖）
 │   ├── validate.py            # 结构与内容自检
-│   ├── sync-from-local.py     # 本地 skills/ → 仓库（发布方向，白名单控制）
 │   └── build-catalog.py       # 生成 CATALOG.md
 ├── skills/                    # 本人自建的 skill 平铺于此，一目录一 skill
 │   ├── spp-source-principle/
@@ -68,13 +67,10 @@
 │   │       ├── measure_context.py    #   只读体量盘点仪
 │   │       ├── model_adapters.json   #   模型适配注册表
 │   │       └── DEPLOY.md             #   三步部署到任意项目
-│   └── aden-naming-standard/
-│       ├── SKILL.md
-│       ├── references/        # 规范正文 / 研究底稿 / 上游依据 / 符号登记处
-│       └── scripts/           # naming-lint.js（权威）+ aden_naming_lint.py（子集）
-└── third-party/               # 第三方 skill 只读副本（原样再分发，不进 CATALOG）
-    ├── README.md              # 命名空间规则 + 上游提交登记表
-    └── kami/                  # tw93/Kami @ 6b399e93（MIT，118 文件）
+└── aden-naming-standard/
+    ├── SKILL.md
+    ├── references/             # 规范正文 / 研究底稿 / 上游依据 / 符号登记处
+    └── scripts/                # naming-lint.js（权威）+ aden_naming_lint.py（子集）
 ```
 
 ### 安装
@@ -126,15 +122,16 @@ python "<你的项目>\.workbuddy\context\context_manager.py" --ws "<你的项�
 
 ### 维护约定
 
-- **单一真源**：本地 `~/.workbuddy/skills/` 是编辑真源，本仓库是发布镜像；只按脚本白名单单向同步，不反向回写
-- **发布 context-persistence 的陷阱**：`sync-from-local.py` 对白名单技能是**整目录镜像**（先删后拷）。暂存区若只放 `SKILL.md` 而漏掉 `engine/` 子目录，下一次发布会把仓库里的引擎**删掉**。发布它时暂存区必须是 `SKILL.md` + `engine/` 的完整 6 文件
-- **发布流程**：本地开发 → `python scripts/sync-from-local.py` → `python scripts/validate.py` → `python scripts/build-catalog.py` → `git commit && git push`
-- **新增 skill**：复制 `template/skill-template/` → 在本地开发 → 把目录名加入 `scripts/sync-from-local.py` 的白名单 → 走上述流程
-- **frontmatter 基线**：`name`（须等于目录名）、`description`（非空且 ≤ 1024 字符）、`license`，以及 `version` 与 `status`（顶层字段或 `metadata.` 子字段均可，目录脚本会回退查找）
+- **单一真源**：已发布技能以本仓库 `main` 上已合并版本为唯一权威。本地克隆仅是工作副本；不要从个人技能目录覆盖仓库内容。
+- **修改已发布 skill**：从最新 `main` 建功能分支，在克隆仓库内修改 → `python scripts/validate.py` → `python scripts/build-catalog.py` → 审阅完整 diff → 推送分支并通过 PR 合并。
+- **新增 skill**：从 `template/skill-template/` 在克隆仓库内创建；先确认自建身份与公开发布权限，再校验、生成 CATALOG 并通过 PR。第三方版权技能、私有草稿和内部溯源材料不进入本仓库。
+- **旧发布脚本**：`sync-from-local.py` 已退役并删除；不要使用旧版「本地目录 → 仓库」发布流程。
+- **frontmatter 基线**：`name`（须等于目录名）、`description`（非空且 ≤ 1024 字符）、`license`，以及 `version` 与 `status`（顶层字段或 `metadata.` 子字段均可，目录脚本会回退查找）。
 - **行尾**：由 `.gitattributes` 锁定为 LF
 
 ### 最近更新
 
+- **2026-10-29** — 仓库治理调整：第三方只读快照已迁离公开仓库；公开 `skills/` 只收录本人自建且允许公开发布的技能。已退役本地目录→仓库镜像脚本；已发布技能以 `main` 上已合并版本为唯一权威，后续修改走分支、校验与 PR。另将 SPP R4.4 入口中的四个不完整引用改为实际文件名，修复校验器报错；最终 `validate.py` 5/5 PASS、0 warning。
 - **2026-10-27** — 新增 **`aden-naming-standard`**（**1.4.0**，状态 `draft`，7 文件）：把 ADEN 命名与标识规范 v1.4 做成**装载层**——七段命名式、受控值表（2 前缀 / 5 文档类型 / 9 域 / 5 状态）、三条豁免（§1.3 存量资产 / 代码脚手架 / 项目本地文档）、两个同规则不同作用域的校验器（`naming-lint.js` 权威实现含 §8.1 交叉核对，`aden_naming_lint.py` 无 Node 环境的子集，作用域可切 `generic`/`lab`）。发布前经 `darwin-skill` 做三轮 9 维评估与配对盲评（3×3 独立 judge，全部 keep、零回滚），补的是**工程性**而非规范内容：① 新增「跑不通 / 判不了时怎么办」失败分支表（校验器失败 5 行 + 判定失败 4 行，均「触发条件 → 一线修复 → 仍失败兜底」三段式，兜底带 `manual_audit` / `degraded` / `exempt_unverified` 状态标记）与「三条不许」；② 整改前加 **🔴 CHECKPOINT**（改名 / 移动属不可逆动作，须先核存量、再列「旧名 → 新名」对照等确认）与 **🛑 STOP**（校验未完成不得下合规结论）；③ 声明**路径基准**（所有 `references/`、`scripts/` 相对本 skill 根目录，命令统一用 `$HD` 展开为绝对路径）。命名式、豁免条款、校验器参数一字未动。已知边界：规范本体状态为 Draft，未进集团审批链；`PROVENANCE.md` 未随技能分发，已如实标注
 - **2026-10-20** — `spp-source-principle` 随协议升级至 **R4.4**（**Re-Discovery 重建**，27 文件，纯追加增量挂载、未新增文件）：R4.4 本体定稿（1,613 行，修订议程 8 批次 A–H 逐批 Gate），新增条款原文全部落位——§2.3 契约优先级表、§2.5 协作姿态、§2.6 反迎合（含与 `de-ai-flavor` 的单一来源清单分工）、§8.1 过程播报 + 渐进式输出护栏、§8.2 思考外显护栏、§10.1 主动声明、§10.4.4 情感客观性、§11.7 自我模型披露、§11.8 品质词汇边界护栏、§12.5 异议后执行、§13.4 不可逆操作亮线清单、§17.5 人格档位、§17.6 主动性分级护栏；入口层 wiring（执行流程图 / 路由表 / Override 指令 / 输出前最低检查）同步。四件条件引入器件只落护栏不开器件，2–4 周观察期巡检挂运行期（触发即回退并记录）。R4.3 基线 27 文件备份留档，技能封装 → GitHub 镜像单向派生
 - **2026-10-20** — `de-ai-flavor` 升版 **1.6.3**（**SPP R4.4 互引，判据与 linter 零变化**）：依 SPP R4.4 §2.6「清单分工（单一来源）」落两侧互引——原则层权威在 SPP §2.6，词汇层操作清单在本技能，修改后回查对侧；新增例外条款四条：身份声明语境下的身份事实陈述（「我是 AI 协作者」类）与品质词汇借用（诚实 / 审慎 / 尽责等）不属「助手腔客套」命中范围，范围仅限身份声明语境、禁入结论 / 证据 / 分析正文、回退触发为品质词包装无证据结论即全面禁用——该例外同时消解了「作为 AI」禁词与 SPP §11.7 身份陈述义务的表面冲突。禁词表、篇章 / 句法层规则、反向保护清单、linter 规则编号全部未动
@@ -164,7 +161,7 @@ MIT License（见 [`LICENSE`](LICENSE)）。
 
 My **personal collection of Agent Skills**. Each skill is a self-contained directory following the Agent Skills specification (`SKILL.md` as a thin entry point, with heavier material loaded on demand from `references/` and `assets/`), loadable by any client that supports the spec.
 
-**Inclusion policy**: `skills/` holds only skills **I authored**. Marketplace-installed or third-party-copyrighted skills are never committed there. Third-party skills that need a pinned version live under [`third-party/`](third-party/) as **verbatim redistribution copies** — upstream `LICENSE` retained, exact commit recorded, excluded from the whitelist sync and from `CATALOG.md` generation, so the two namespaces never get conflated.
+**Inclusion policy**: public `skills/` contains only skills **I authored and am permitted to publish publicly**. Third-party-copyrighted skills, unpublished drafts, and private provenance materials are not stored in this repository; any private copies must remain outside this repository's catalog, validation, and release flow.
 
 ### Included skills
 
@@ -193,7 +190,6 @@ See [`CATALOG.md`](CATALOG.md) for the full listing (with generated descriptions
 │   └── skill-template/        # New-skill scaffold, copy and go
 ├── scripts/                   # Repository maintenance tools (build-time only)
 │   ├── validate.py            # Structure and content checks
-│   ├── sync-from-local.py     # Local skills/ -> repo (publish direction, whitelisted)
 │   └── build-catalog.py       # Generates CATALOG.md
 ├── skills/                    # My own skills, flat - one directory per skill
 │   ├── spp-source-principle/
@@ -207,13 +203,10 @@ See [`CATALOG.md`](CATALOG.md) for the full listing (with generated descriptions
 │   │       ├── measure_context.py    # Read-only volume meter
 │   │       ├── model_adapters.json   # Model adapter registry
 │   │       └── DEPLOY.md             # Three-step deployment to any project
-│   └── aden-naming-standard/
-│       ├── SKILL.md
-│       ├── references/        # Standard text / research draft / upstream basis / glossary
-│       └── scripts/           # naming-lint.js (authoritative) + aden_naming_lint.py (subset)
-└── third-party/               # Vendored third-party skills (verbatim, not in CATALOG)
-    ├── README.md              # Namespace rules + upstream commit registry
-    └── kami/                  # tw93/Kami @ 6b399e93 (MIT, 118 files)
+└── aden-naming-standard/
+    ├── SKILL.md
+    ├── references/             # Standard text / research draft / upstream basis / glossary
+    └── scripts/                # naming-lint.js (authoritative) + aden_naming_lint.py (subset)
 ```
 
 ### Installation
@@ -244,15 +237,16 @@ python <your-project>/.workbuddy/context/context_manager.py --ws <your-project> 
 
 ### Conventions
 
-- **Single source of truth**: authoring happens in the local `~/.workbuddy/skills/`; this repository is the published mirror. Sync is one-way and whitelisted - nothing is ever written back
-- **Publishing trap for `context-persistence`**: `sync-from-local.py` mirrors each whitelisted skill as a **whole directory** (delete-then-copy). If your staging copy holds only `SKILL.md` and omits the `engine/` subdirectory, the next publish **deletes the engine from this repository**. Stage the full 6 files (`SKILL.md` + `engine/`) when publishing it
-- **Publish flow**: author locally -> `python scripts/sync-from-local.py` -> `python scripts/validate.py` -> `python scripts/build-catalog.py` -> `git commit && git push`
-- **Adding a skill**: copy `template/skill-template/` -> develop locally -> add the directory name to the whitelist in `scripts/sync-from-local.py` -> run the flow above
-- **Frontmatter baseline**: `name` (must equal the directory name), `description` (non-empty, <= 1024 chars), `license`, plus `version` and `status` (either top-level keys or `metadata.` sub-keys - the repo scripts fall back between both)
+- **Single source of truth**: the merged version on this repository's `main` branch is the sole authority for published skills. A local clone is only a working copy; never overwrite repository content from a personal skills directory.
+- **Editing a published skill**: branch from the latest `main`, edit in the repository clone, run `python scripts/validate.py` and `python scripts/build-catalog.py`, review the full diff, push the branch, and merge through a pull request.
+- **Adding a skill**: create it from `template/skill-template/` inside the repository clone; first confirm authorship and permission for public release, then validate, regenerate CATALOG, and submit a pull request. Third-party-copyrighted skills, private drafts, and internal provenance materials do not belong in this repository.
+- **Retired publisher**: `sync-from-local.py` has been retired and removed. Do not use the former local-directory-to-repository publishing workflow.
+- **Frontmatter baseline**: `name` (must equal the directory name), `description` (non-empty, <= 1024 chars), `license`, plus `version` and `status` (either top-level keys or `metadata.` sub-keys - the repo scripts fall back between both).
 - **Line endings**: locked to LF by `.gitattributes`
 
 ### Recent changes
 
+- **2026-10-29** — Repository governance update: vendored third-party snapshots have been removed from this public repository; public `skills/` now admits only self-authored skills with permission for public release. The local-to-repository mirror script is retired; merged versions on `main` are authoritative, and future changes go through a branch, validation, and pull request. Four incomplete references in the SPP R4.4 entry were corrected to actual filenames to resolve validator errors; final `validate.py` result: 5/5 PASS, 0 warnings.
 - **2026-10-27** — new skill **`aden-naming-standard`** (**1.4.0**, status `draft`, 7 files): a **loader layer** for the ADEN naming and identifier standard v1.4 — the seven-segment naming form, controlled-value tables (2 prefixes / 5 doc types / 9 domains / 5 statuses), three exemption classes (§1.3 legacy assets / code scaffolding / project-local docs), and two validators sharing one rule set across switchable scopes (`naming-lint.js`, the authoritative implementation including the §8.1 cross-check, and `aden_naming_lint.py`, a subset for environments without Node, with `generic`/`lab` profiles). Before publishing it went through three rounds of `darwin-skill` 9-dimension evaluation with paired blind judging (3×3 independent judges, every round kept, zero reverts). What changed was **engineering, not content**: (1) a "what to do when it breaks / when you cannot decide" failure-branch table (5 rows for a failing validator, 4 for an undecidable case, each in trigger -> first-line fix -> last-resort fallback form, with `manual_audit` / `degraded` / `exempt_unverified` status tags) plus "three hard bans"; (2) a **🔴 CHECKPOINT** before remediation (renaming and moving are irreversible — verify the object is not legacy, then present an old-name -> new-name table and wait for sign-off) and a **🛑 STOP** (no compliance verdict may be issued before the validator returns); (3) an explicit **path basis** (every `references/` and `scripts/` path is relative to this skill's root, with commands expanded through `$HD` to absolute paths). The naming form, exemption clauses and validator parameters are untouched. Known boundaries: the standard itself is Draft and has not entered group approval, and `PROVENANCE.md` did not ship with the skill — now stated plainly instead of left as a dangling reference
 - **2026-10-20** — `spp-source-principle` moves to **R4.4** (**Re-Discovery rebuild**; 27 files, append-only incremental remount, no new files). The R4.4 protocol is final (1,613 lines, revision agenda batches A-H each through its own Gate), and every new clause is now mounted verbatim: §2.3 contract-priority table, §2.5 collaboration posture, §2.6 anti-sycophancy (with the single-source list split against `de-ai-flavor`), §8.1 progress broadcast + progressive-output guardrail, §8.2 thinking-externalization guardrail, §10.1 proactive declaration, §10.4.4 emotional objectivity, §11.7 self-model disclosure, §11.8 quality-vocabulary boundary guardrail, §12.5 post-dissent execution, §13.4 bright-line list for irreversible operations, §17.5 persona modes, §17.6 proactivity-tiers guardrail; entry-layer wiring (flow diagram / routing table / Override commands / pre-output minimum checks) is synced too. The four conditional-introduction devices land as guardrails only (no devices enabled), with a 2-4 week observation window whose triggers roll back and log on firing. The R4.3 baseline (27 files) is archived; the chain runs skill package -> GitHub mirror, one way
 - **2026-10-20** — `de-ai-flavor` released as **1.6.3** (**SPP R4.4 cross-reference; criteria and linter untouched**). Implements the §2.6 "list split (single source)" clause with two-way cross-references: principle authority lives in SPP §2.6, the operational word lists live here, and each side re-checks the other after changes. Four exception clauses added: identity-fact statements in an identity-declaration context ("I am an AI collaborator") and borrowed quality vocabulary (honest / prudent / diligent) do not fall inside the "assistant-tone pleasantries" hit range; the scope is limited to identity-declaration contexts, barred from conclusions / evidence / analysis bodies, with rollback defined as quality words wrapping an unevidenced conclusion (full ban and log). The exception simultaneously resolves the apparent conflict between the "as an AI" ban and SPP §11.7's self-model disclosure duty. Banned-word lists, discourse/syntax rules, do-not-change lists and linter rule IDs are all untouched
