@@ -46,8 +46,10 @@ import json
 import os
 import sys
 import datetime
+import html
 import pathlib
 import re
+import tempfile
 
 SCHEMA_VERSION = "1.0"
 
@@ -127,16 +129,83 @@ class ContextManager:
 
     @staticmethod
     def _write_json(p: pathlib.Path, obj: dict) -> None:
-        p.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
+        """原子写 JSON，避免进程中断留下半截 SSOT。"""
+        p.parent.mkdir(parents=True, exist_ok=True)
+        temp_path = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                encoding="utf-8",
+                dir=str(p.parent),
+                prefix=f".{p.name}.",
+                suffix=".tmp",
+                delete=False,
+            ) as f:
+                temp_path = pathlib.Path(f.name)
+                f.write(json.dumps(obj, ensure_ascii=False, indent=2))
+                f.write("\n")
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(str(temp_path), str(p))
+        except Exception:
+            if temp_path is not None:
+                try:
+                    temp_path.unlink(missing_ok=True)
+                except OSError:
+                    pass
+            raise
 
     # ------------------------- 读取 -------------------------
     def _read_json(self, p: pathlib.Path) -> dict | None:
-        if p.exists():
-            try:
-                return json.loads(p.read_text(encoding="utf-8"))
-            except Exception:
-                return None
-        return None
+        if not p.exists():
+            return None
+        try:
+            data = json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+            raise ValueError(f"无法安全读取 JSON 文件，已停止操作：{p}: {exc}") from exc
+        if not isinstance(data, dict):
+            raise ValueError(f"JSON 根节点必须是对象，已停止操作：{p}")
+        return data
+
+    def _read_task_state(self) -> dict | None:
+        """读取并校验 SSOT；损坏或 schema 不符时 fail-closed，不允许覆盖。"""
+        state = self._read_json(self.task_state_path)
+        if state is None:
+            return None
+        if state.get("schema_version") != SCHEMA_VERSION:
+            raise ValueError(
+                f"task_state.json schema_version 不匹配（期望 {SCHEMA_VERSION}），"
+                f"已停止写入：{self.task_state_path}"
+            )
+        task = state.get("task")
+        meta = state.get("meta")
+        if not isinstance(task, dict) or not isinstance(meta, dict):
+            raise ValueError(f"task_state.json 缺少有效的 task/meta 对象，已停止写入：{self.task_state_path}")
+        expected = {
+            "task": {
+                "goal": str,
+                "subgoals": list,
+                "status": str,
+                "decisions_log": list,
+                "open_questions": list,
+                "artifacts": list,
+                "last_progress": str,
+            },
+            "meta": {
+                "last_active": str,
+                "source_models": list,
+                "token_budget": dict,
+            },
+        }
+        for section, fields in expected.items():
+            values = state[section]
+            for key, value_type in fields.items():
+                if not isinstance(values.get(key), value_type):
+                    raise ValueError(
+                        f"task_state.json 字段 {section}.{key} 缺失或类型错误，"
+                        f"已停止写入：{self.task_state_path}"
+                    )
+        return state
 
     @staticmethod
     def _read_text(p: pathlib.Path) -> str:
@@ -192,19 +261,16 @@ class ContextManager:
         「讲机制本身」的元文档，而体量口径 / K 面自检 / 路线图等运营章节一条没进。
 
         现改为按章节声明选取：〔常驻〕**整节纳入**（不切半句）；超预算则**整节跳过
-        并显式报出**（不静默丢弃）；〔按需〕/未声明只在末尾指针行列名（送达纪律：
-        符号要拼出来，否则等于不存在）。无任何声明时回退旧行为并提示补声明。
+        并显式报出**（不静默丢弃）；〔按需〕/未声明只在末尾指针行列名。无任何声明时
+        也按安全默认处理：只列出章节指针，不注入正文。
         """
         budget = self.MEMORY_INJECT_BUDGET if budget is None else budget
         raw = self._read_text(self.memory_dir / "MEMORY.md")
         if not raw:
             return ""
         secs = self._read_memory_sections()
-        if not any(s["tier"] for s in secs):
-            # 无任何分层声明：回退旧的按序截断，但把「为什么可能截错」说清楚
-            return (raw[:budget]
-                    + f"\n（按文件顺序截断至 {budget} 字符。建议在 `## 标题` 后加 "
-                      "〔常驻〕/〔按需〕声明注入分层 —— 否则选中哪些章节由文件顺序决定。）")
+        if not secs:
+            return "（MEMORY.md 无 `##` 分节，未注入正文；全文：`.workbuddy/memory/MEMORY.md`）"
         picked, used, over = [], 0, []
         for s in secs:
             if s["tier"] != "常驻":
@@ -241,7 +307,9 @@ class ContextManager:
 
     def load_bundle(self) -> dict:
         """检索层：聚合各层为单一 Context Bundle。"""
-        state = self._read_json(self.task_state_path) or self._empty_state()
+        state = self._read_task_state()
+        if state is None:
+            state = self._empty_state()
         return {
             "schema_version": SCHEMA_VERSION,
             "identity": self._read_identity(),
@@ -506,16 +574,17 @@ class ContextManager:
     # ------------------------- 注入边界（Ch2 Framework 4：提示注入分层防御） -------------------------
     @staticmethod
     def wrap_external(content: str, source: str = "unknown") -> str:
-        """把外部不可信内容包裹为数据，切断「指令 / 数据」混淆。
+        """包裹外部不可信内容，并转义标记字符以防其伪造封装边界。
 
         外部内容（网页 / 邮件 / 文档 / 检索结果）是间接提示注入的载体。
-        配套纪律：外部内容不得直接触发转账 / 删除 / 对外发信等高副作用操作，
-        须经独立授权；上下文层只降低成功率，执行层权限与沙盒才是兜底。
+        转义只保护结构边界，不会让内容变可信，也不能替代执行层权限控制。
+        转账 / 删除 / 对外发信等高副作用操作仍须经独立授权。
         """
-        src = (source or "unknown").strip() or "unknown"
+        src = html.escape((source or "unknown").strip() or "unknown", quote=True)
+        body = html.escape(content.strip(), quote=False)
         return (
             f'<external_content source="{src}" trust="untrusted">\n'
-            f"{content.strip()}\n"
+            f"{body}\n"
             f"</external_content>"
         )
 
@@ -585,8 +654,10 @@ class ContextManager:
         return datetime.datetime.now().isoformat(timespec="seconds")
 
     def _touch_meta(self, model: str) -> dict:
-        state = self._read_json(self.task_state_path) or self._empty_state()
-        meta = state.setdefault("meta", {})
+        state = self._read_task_state()
+        if state is None:
+            state = self._empty_state()
+        meta = state["meta"]
         meta["last_active"] = self._now()
         models = meta.setdefault("source_models", [])
         if model and model not in models:
@@ -788,4 +859,8 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except (OSError, ValueError) as exc:
+        print(f"错误：{exc}", file=sys.stderr)
+        sys.exit(2)
