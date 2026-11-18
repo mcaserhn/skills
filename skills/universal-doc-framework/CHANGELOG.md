@@ -10,3 +10,4 @@
 - 新增 `examples/sample-project/` 与 `examples/naming-samples.md`。
 - `SKILL.md` 从「指向样板工作区」改为「指向包内资产」，补齐依赖声明与失败分支。
 - 修复此前复检发现的 9 类偏差：全仓版本指针统一 USP v1.1、校验顺序、引擎文件名、载体形示例、交叉引用、前缀计数、大小写与错字等。
+- 安装说明修正为集合仓库布局：从 `mcaserhn/skills` 克隆后拷贝 `skills/universal-doc-framework/`，而不是把整个仓库克隆成单个技能目录。
