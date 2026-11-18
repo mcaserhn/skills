@@ -26,7 +26,7 @@ DOC_FILES = [
     "04-document-naming-scheme.md",
     "05-naming-system.md",
 ]
-TOOL_FILES = ["scaffold.py", "structure_lint.py"]
+TOOL_FILES = ["scaffold.py", "structure_lint.py", "place_doc.py"]
 
 
 def pairs(workspace: str) -> list[tuple[str, str]]:

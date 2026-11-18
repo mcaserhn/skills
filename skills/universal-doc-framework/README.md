@@ -9,6 +9,7 @@
 - 为课题调研、需求调研、软件开发、系统盘点逆向复刻、Agent 打磨、专业与科研规划六类场景生成同一套六段骨架；
 - 按对象类型路由到正确命名式，为文档 / ISMS 文件 / 业务域 / 项目组合 / 站点 / 账号 / 内容层标识 / 数据对象自动选名；
 - 生成 `AGENTS.md` 静态识别契约，支持与 `context-persistence` 的动态状态层接缝；
+- 脚手架只建**空骨架**，内容文档经 SPP 等技能共构结晶后，用 `place_doc.py` 按规范命名落位（空壳不写内容）；
 - 校验骨架结构与命名形式，校验跑不通时只报「校验未完成」，不凭手感判合规。
 
 ## 安装
@@ -49,7 +50,8 @@ universal-doc-framework/
 ├── LICENSE                       MIT
 ├── docs/                         规范正文（01–05）
 ├── tools/
-│   ├── scaffold.py               项目骨架生成器
+│   ├── scaffold.py               项目骨架生成器（只建空骨架）
+│   ├── place_doc.py              产物落位器（规范命名 + 空文档壳，不写内容）
 │   ├── structure_lint.py         结构 + 命名校验入口
 │   └── sync_from_workspace.py    维护者用：同步与漂移检查
 └── examples/
@@ -65,6 +67,11 @@ SKILL_DIR="$HOME/.workbuddy-ai/skills/universal-doc-framework"
 # 生成项目骨架
 python "$SKILL_DIR/tools/scaffold.py" ./my-project \
   --scenario Software --name "客户门户" --mix single
+
+# 内容结晶后再落位（只建空壳，不写内容）
+python "$SKILL_DIR/tools/place_doc.py" ./my-project \
+  --type InformationNote --domain Academic --subject "定价调研纪要" \
+  --phase 20-Build --prefix PERS --purpose "记录定价证据"
 
 # 校验（设置 ADEN_NAMING_LINT 指向上游 naming-lint.js 可同时校验命名）
 python "$SKILL_DIR/tools/structure_lint.py" ./my-project

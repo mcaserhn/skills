@@ -2,7 +2,7 @@
 name: universal-doc-framework
 description: Universal Doc Framework（通用文档骨架与规范）。自包含 skill：通用文件夹结构 + 命名规范 + 文档命名一体化，安装即可离线使用。用于各类课题调研、需求调研（软件与业务逻辑）、软件系统开发全流程（需求/设计/开发/验证/UAT/上线）、系统盘点+逆向+复刻、技能/Agent/Harness 打造打磨、专业方向与科研规划。当用户要新建项目目录、设计文件夹结构、定文档或对象命名、问"这个项目该怎么组织/分几个阶段/文件怎么命名"、或需要 AI 一进项目就自动识别场景与阶段时使用。触发词：项目结构、文件夹结构、目录规范、文档命名、命名规范、骨架、新建项目、scaffold、六段骨架、USP。
 license: MIT
-version: "1.1.1"
+version: "1.1.2"
 status: draft
 ---
 
@@ -29,7 +29,8 @@ status: draft
 | `docs/03-scenario-profiles.md` | 六类场景投影、单一/混合落地步骤、`AGENTS.md` 模板、命名示例 |
 | `docs/04-document-naming-scheme.md` | 文档名称方案（DocName v1.0）：双形态、13 类文档类型、AI 四步选名 |
 | `docs/05-naming-system.md` | 完整命名体系（NamingSystem v1.0）：9 类对象全景 + 按对象类型选式总表 |
-| `tools/scaffold.py` | 项目骨架生成器：只建新对象、已存在一律跳过 |
+| `tools/scaffold.py` | 项目骨架生成器：只建空骨架，已存在一律跳过 |
+| `tools/place_doc.py` | 产物落位器：按规范命名并建空文档壳，不写内容 |
 | `tools/structure_lint.py` | 结构校验器：查六段目录、`AGENTS.md` 字段，命名项委托上游 lint |
 | `tools/sync_from_workspace.py` | 维护者用：从开发样板工作区同步规范与工具，`--check` 可查漂移 |
 | `examples/sample-project/` | 脚手架生成的示例项目（六段齐全，可直接对照） |
@@ -84,6 +85,33 @@ python "$SKILL_DIR/tools/scaffold.py" <目标目录> --scenario Career --name "�
 ```
 
 `structure_lint.py` 会检查每个 `W<nn>-<主体>` 目录内的六段与 `AGENTS.md`；若声明了 `mix_mode: parallel` 却没有实例目录，给 `§4.2` WARN（不硬判违规）。
+
+### 4.3.1 骨架与内容的分工（硬纪律）
+
+**脚手架只建空骨架，绝不预置内容文档。** 这是本 skill 与内容型技能（SPP 课题共构等）的边界，违反会造成「先出结论再找证据」：
+
+- **doc-framework 管语法** —— 目录长什么样、文档叫什么名、落在哪一段。
+- **SPP 等内容技能管语义** —— 写什么、凭什么成立、结论是否承重。
+
+因此：
+
+1. `scaffold.py` 只生成六段 + 每段 README + 根 `AGENTS.md` / `README.md`。**不应**在调研/共构开始前创建带具体内容的文档（评估维度、权重、产品清单、调研结论等）。
+2. 内容**结晶之后**才落文档：某个结论/纪要/规格经 SPP 共构成型、有证据支撑，才调用 `place_doc.py` 建壳并填写。
+3. 空段就留空，放 README 说明即可（`docs/01` §3.3）。骨架完整 ≠ 每段都要有文档。
+
+### 4.3.2 按需落位（内容结晶后调用）
+
+```bash
+python "$SKILL_DIR/tools/place_doc.py" <项目根> \
+  --type InformationNote --domain Academic \
+  --subject "Zoho定价调研纪要" --phase 20-Build \
+  --prefix PERS --purpose "记录 Zoho 定价的证据与来源"
+```
+
+- `--type` / `--domain` / `--prefix` / `--status` 是**受控值白名单**，即席造词直接报错（取值见 `docs/04` §3）；判不了就问用户，不要猜。
+- `--phase` 决定落位段；`--status` 留空时按段推导（00/10/20→Draft、30→Review、40→Approved，见 `docs/04` §4.4）。
+- 生成的文档**只有元数据头和空章节**，正文留白；工具**不写任何内容**，也不覆盖已存在文件。
+- SPP 产物到文档类型/段位的推荐映射见 `docs/03` §7.1。
 
 ### 4.4 部署动态状态层（可选）
 
