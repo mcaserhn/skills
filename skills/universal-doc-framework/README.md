@@ -68,6 +68,12 @@ python "$SKILL_DIR/tools/scaffold.py" ./my-project \
 
 # 校验（设置 ADEN_NAMING_LINT 指向上游 naming-lint.js 可同时校验命名）
 python "$SKILL_DIR/tools/structure_lint.py" ./my-project
+
+# 混合场景：一次生成根级共享六段 + 两个实例各自的六段
+python "$SKILL_DIR/tools/scaffold.py" ./duo --scenario Software --name "客户门户" \
+  --mix parallel \
+  --instance W01-CustomerPortal:Software \
+  --instance W02-BusinessRules:BusinessLogic
 ```
 
 更完整的场景判定、命名路由与失败分支见 `SKILL.md` 与 `docs/03-scenario-profiles.md`。

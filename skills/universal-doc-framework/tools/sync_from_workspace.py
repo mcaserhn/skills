@@ -7,15 +7,13 @@
     python tools/sync_from_workspace.py --workspace /path/to/样板工作区 [--check]
     UDF_WORKSPACE=/path/to/样板工作区 python tools/sync_from_workspace.py [--check]
 
---check 只比较哈希，不写文件；发现差异或缺失时退出码为 1。
-默认模式按源文件覆盖包内副本，不删除多余文件，不改动 SKILL.md/README.md 等包内自有文件。
+--check 只按归一化后的内容（行尾统一 LF）比较，不写文件；发现差异或缺失时退出码为 1。
+默认模式按源文件覆盖包内副本并统一写 LF，不删除多余文件，不改动 SKILL.md/README.md 等包内自有文件。
 """
 from __future__ import annotations
 
 import argparse
-import hashlib
 import os
-import shutil
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -46,12 +44,15 @@ def pairs(workspace: str) -> list[tuple[str, str]]:
     return result
 
 
-def sha256(path: str) -> str:
-    h = hashlib.sha256()
+def content(path: str) -> bytes:
+    """读取文件并把行尾归一化为 LF。
+
+    开发样板工作区在 Windows 上是 CRLF；发布包统一存 LF，可避免整文件伪漂移，
+    也保证带 shebang 的 Python 工具在 Linux/macOS 上可直接执行。
+    """
     with open(path, "rb") as f:
-        for chunk in iter(lambda: f.read(65536), b""):
-            h.update(chunk)
-    return h.hexdigest()
+        data = f.read()
+    return data.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
 
 
 def main() -> int:
@@ -79,17 +80,19 @@ def main() -> int:
                 problems += 1
                 continue
             os.makedirs(os.path.dirname(dst), exist_ok=True)
-            shutil.copy2(src, dst)
+            with open(dst, "wb") as f:
+                f.write(content(src))
             print(f"[ADDED] {rel}")
             continue
-        if sha256(src) == sha256(dst):
+        if content(src) == content(dst):
             print(f"[OK] {rel}")
             continue
         if args.check:
             print(f"[DRIFT] 内容不同: {rel}")
             problems += 1
             continue
-        shutil.copy2(src, dst)
+        with open(dst, "wb") as f:
+            f.write(content(src))
         print(f"[UPDATED] {rel}")
 
     if args.check:
