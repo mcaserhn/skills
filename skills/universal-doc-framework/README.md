@@ -16,14 +16,16 @@
 技能目录名必须与技能 ID 一致：`universal-doc-framework`。
 
 ```bash
-# macOS / Linux
-git clone https://github.com/<owner>/<repo>.git \
+# macOS / Linux：本技能位于集合仓库的 skills/ 子目录
+git clone https://github.com/mcaserhn/skills.git /tmp/skills
+cp -r /tmp/skills/skills/universal-doc-framework \
   "$HOME/.workbuddy-ai/skills/universal-doc-framework"
 ```
 
 ```powershell
 # Windows PowerShell
-git clone https://github.com/<owner>/<repo>.git `
+git clone https://github.com/mcaserhn/skills.git "$env:TEMP\skills"
+Copy-Item -Recurse -Force "$env:TEMP\skills\skills\universal-doc-framework" `
   "$env:USERPROFILE\.workbuddy-ai\skills\universal-doc-framework"
 ```
 
@@ -32,7 +34,9 @@ git clone https://github.com/<owner>/<repo>.git `
 升级：
 
 ```bash
-git -C "$HOME/.workbuddy-ai/skills/universal-doc-framework" pull
+git -C /tmp/skills pull
+cp -r /tmp/skills/skills/universal-doc-framework/. \
+  "$HOME/.workbuddy-ai/skills/universal-doc-framework/"
 ```
 
 ## 目录结构
