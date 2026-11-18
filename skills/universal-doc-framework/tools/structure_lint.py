@@ -5,7 +5,9 @@
 
 1. 六段目录齐全（空段有 README.md 视为齐全）
 2. AGENTS.md 必含字段齐备（§5.2）
-3. 命名合规 —— 调用 aden-naming-standard 的权威 lint（如可用），不另写命名规则
+3. 并行实例：W<nn>-<主体> 目录内六段与 AGENTS.md 齐备（§4.2）；
+   声明 parallel 却无实例目录时给 WARN，不硬判违规
+4. 命名合规 —— 调用 aden-naming-standard 的权威 lint（如可用），不另写命名规则
 
 退出码：0 = 无 ERROR；1 = 有 ERROR；2 = 参数/环境错误。
 校验器跑不起来时只报「校验未完成」，不输出合规判定（docs/01 §8.2）。
@@ -32,6 +34,7 @@ REQUIRED_AGENTS_FIELDS = {
 def check(root: str) -> tuple[list[str], list[str]]:
     errors: list[str] = []
     warns: list[str] = []
+    root_text = ""
 
     # 1. 六段目录
     for phase in PHASES:
@@ -50,6 +53,7 @@ def check(root: str) -> tuple[list[str], list[str]]:
     else:
         with open(agents, "r", encoding="utf-8", errors="replace") as f:
             text = f.read()
+        root_text = text
         for group, patterns in REQUIRED_AGENTS_FIELDS.items():
             for pat in patterns:
                 if not re.search(pat, text):
@@ -57,7 +61,38 @@ def check(root: str) -> tuple[list[str], list[str]]:
         if re.search(r"\b(progress|last_active|time)\s*:", text):
             warns.append("[§5.3] AGENTS.md 疑似写入动态字段，应移到 task_state.json")
 
-    # 3. 命名合规 —— 交给上游权威 lint
+    # 2b. 并行实例（docs/01 §4.2）
+    instance_dirs = sorted(
+        d for d in os.listdir(root)
+        if re.match(r"^W\d{2}-", d) and os.path.isdir(os.path.join(root, d))
+    )
+    if re.search(r"mix_mode\s*:\s*parallel", root_text) and not instance_dirs:
+        warns.append(
+            "[§4.2] AGENTS.md 声明 mix_mode: parallel，但未发现 W<nn>-<主体> 实例目录；"
+            "若确需并行请用 --instance 或按两步法补建"
+        )
+    for inst in instance_dirs:
+        base = os.path.join(root, inst)
+        for phase in PHASES:
+            d = os.path.join(base, phase)
+            if not os.path.isdir(d):
+                errors.append(f"[§4.2] 实例 {inst}/ 缺少阶段目录 {phase}/")
+                continue
+            rd = os.path.join(d, "README.md")
+            if not os.path.isfile(rd) and not os.listdir(d):
+                warns.append(f"[§4.2] 实例 {inst}/{phase}/ 为空且无 README.md 说明")
+        ia = os.path.join(base, "AGENTS.md")
+        if not os.path.isfile(ia):
+            errors.append(f"[§4.2] 实例 {inst}/ 缺少 AGENTS.md")
+        else:
+            with open(ia, "r", encoding="utf-8", errors="replace") as f:
+                itext = f.read()
+            for group, patterns in REQUIRED_AGENTS_FIELDS.items():
+                for pat in patterns:
+                    if not re.search(pat, itext):
+                        errors.append(f"[§4.2] 实例 {inst}/ AGENTS.md 缺少「{group}」字段（未匹配 /{pat}/）")
+
+    # 4. 命名合规 —— 交给上游权威 lint
     naming_lint = os.environ.get("ADEN_NAMING_LINT", "")
     if naming_lint and os.path.isfile(naming_lint):
         # 上游命名 lint 是 Node 脚本，按扩展名选解释器；不能把 JS 交给 Python 执行
@@ -122,7 +157,7 @@ def main() -> int:
         print("结论：不合规（以上 ERROR 须修复）")
         return 1
     if warns:
-        print("结论：结构合规，但有 WARN（命名校验未完成不等于合规）")
+        print("结论：结构合规，但有 WARN（请逐条查看，不输出无条件合规判定）")
     else:
         print("结论：合规")
     return 0

@@ -1,8 +1,8 @@
-# 03 · 场景投影与落地指南（USP-GUIDE v1.0）
+# 03 · 场景投影与落地指南（USP-GUIDE v1.1）
 
 > **文档性质**：指南。场景取值投影与操作步骤，不含规则（见 `docs/01`）与注册字段（见 `docs/02`）。
 > **上游**：`aden-naming-standard` v1.4 + `docs/01-universal-folder-structure.md` v1.1。
-> **状态**：v1.0 · Draft · 2026-11-18。
+> **状态**：v1.1 · Draft · 2026-11-18。
 
 ---
 
@@ -62,6 +62,28 @@
 ```
 
 > 注意：并行实例时，根级 `50-Sustain` 与各实例内的 `50-Sustain` 职责不同 —— 根级管**跨实例**复用，实例内管**本实例**复盘。`docs/01` §3.1 对根级骨架的定义仍成立。
+
+**一次生成（1.1.1 起）**：`scaffold.py` 的 `--instance` 可重复，格式 `<Wnn-主体>:<场景码>`。根级建共享六段，每个实例目录内嵌完整六段：
+
+```bash
+SKILL_DIR=<本 skill 根目录绝对路径>
+python "$SKILL_DIR/tools/scaffold.py" <项目根> --scenario Software \
+  --name "客户门户" --mix parallel \
+  --instance W01-CustomerPortal:Software \
+  --instance W02-BusinessRules:BusinessLogic
+```
+
+`--phases` 只作用于根级；实例内始终完整六段。给 `--instance` 时即使没写 `--mix parallel` 也自动按并行处理。
+
+**两步法兜底（旧版本或手工补建）**：先建根级，再对每个实例目录各跑一次脚手架 ——
+
+```bash
+python "$SKILL_DIR/tools/scaffold.py" <项目根> --scenario Software --mix parallel
+python "$SKILL_DIR/tools/scaffold.py" <项目根>/W01-CustomerPortal --scenario Software --name "客户门户"
+python "$SKILL_DIR/tools/scaffold.py" <项目根>/W02-BusinessRules --scenario BusinessLogic --name "业务规则"
+```
+
+只写 `--mix parallel` 而不建实例目录时，脚本会在 `AGENTS.md` 与输出里留下兜底提示；`structure_lint.py` 给出 `§4.2` WARN，不硬判违规。
 
 ---
 
@@ -152,3 +174,4 @@ active_phase: <00-Ingest|10-Analyze|20-Build|30-Verify|40-Deliver|50-Sustain>
 | 版本 | 日期 | 变更 | 作者 |
 | --- | --- | --- | --- |
 | v1.0 | 2026-11-18 | 首次成文：六类场景投影、单一/混合落地步骤、AGENTS.md 模板、命名示例、引擎接缝、常见误用 | — |
+| v1.1 | 2026-11-18 | §3 补 `scaffold.py --instance` 一次生成法与两步法兜底；明确 `--phases` 只作用于根级、实例内始终完整六段；声明 parallel 而无实例目录时由校验器给 WARN。条款实质未变 | — |

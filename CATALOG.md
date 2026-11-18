@@ -10,6 +10,6 @@
 | [`de-ai-flavor`](skills/de-ai-flavor/) | Remove "AI flavor" (AI 味儿) from LLM outputs in both conversational replies and document generation, for Chinese AND English text. Covers word-level ... | 1.6.3 | stable | 16 |
 | [`devils-advocate`](skills/devils-advocate/) | 毒舌陪练 / 反方批判者模式。当对方提出想法、方案、计划或判断时，不奉承、不铺垫，只列出跨过「承重线」的风险（≤5 ... | 1.0.0 | stable | 1 |
 | [`spp-source-principle`](skills/spp-source-principle/) | Execute the Source Principle Protocol (SPP v4.0 R4.4) for human-AI collaboration. Use when the task involves load-bearing conclusions (承重结论), formal ... | R4.4 | stable | 27 |
-| [`universal-doc-framework`](skills/universal-doc-framework/) | Universal Doc Framework（通用文档骨架与规范）。自包含 skill：通用文件夹结构 + 命名规范 + ... | 1.1.0 | draft | 22 |
+| [`universal-doc-framework`](skills/universal-doc-framework/) | Universal Doc Framework（通用文档骨架与规范）。自包含 skill：通用文件夹结构 + 命名规范 + ... | 1.1.1 | draft | 22 |
 
 Total: **6** skill(s).

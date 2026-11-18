@@ -2,7 +2,7 @@
 name: universal-doc-framework
 description: Universal Doc Framework（通用文档骨架与规范）。自包含 skill：通用文件夹结构 + 命名规范 + 文档命名一体化，安装即可离线使用。用于各类课题调研、需求调研（软件与业务逻辑）、软件系统开发全流程（需求/设计/开发/验证/UAT/上线）、系统盘点+逆向+复刻、技能/Agent/Harness 打造打磨、专业方向与科研规划。当用户要新建项目目录、设计文件夹结构、定文档或对象命名、问"这个项目该怎么组织/分几个阶段/文件怎么命名"、或需要 AI 一进项目就自动识别场景与阶段时使用。触发词：项目结构、文件夹结构、目录规范、文档命名、命名规范、骨架、新建项目、scaffold、六段骨架、USP。
 license: MIT
-version: "1.1.0"
+version: "1.1.1"
 status: draft
 ---
 
@@ -69,10 +69,21 @@ status: draft
 ```bash
 SKILL_DIR=<本 skill 根目录的绝对路径>   # 展开成绝对路径，不要照抄变量
 python "$SKILL_DIR/tools/scaffold.py" <目标目录> --scenario <场景> \
-  --name "<项目名>" [--mix single|parallel] [--phases 00,10,20] [--with-context]
+  --name "<项目名>" [--mix single|parallel] [--phases 00,10,20] [--with-context] \
+  [--instance W01-Career:Career --instance W02-AgentCraft:AgentCraft]
 ```
 
 脚本只创建不存在的对象，已存在的跳过并报告，**绝不覆盖**（对齐存量豁免 §1.3）。`--with-context` 只输出部署提示，不自动初始化引擎。
+
+**并行实例一次生成**：`--instance` 可重复，格式 `<Wnn-主体>:<场景码>`。根级建共享六段，每个实例目录内嵌完整六段（`docs/01` §4.2）。给出 `--instance` 时自动按 `parallel` 处理；`--phases` 只作用于根级，实例内始终完整六段。
+
+**两步法兜底**：只写 `--mix parallel` 而不给 `--instance` 时，脚本只建根级骨架，并在 `AGENTS.md` 与输出里留下兜底提示。此时对每个实例目录再跑一次脚手架即可：
+
+```bash
+python "$SKILL_DIR/tools/scaffold.py" <目标目录> --scenario Career --name "画像与简历"
+```
+
+`structure_lint.py` 会检查每个 `W<nn>-<主体>` 目录内的六段与 `AGENTS.md`；若声明了 `mix_mode: parallel` 却没有实例目录，给 `§4.2` WARN（不硬判违规）。
 
 ### 4.4 部署动态状态层（可选）
 
