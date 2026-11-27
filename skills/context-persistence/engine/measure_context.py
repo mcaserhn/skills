@@ -105,7 +105,8 @@ def main():
 
     # ---------- 3. 底 层源文件体量 ----------
     print("\n[3] 底层源文件体量")
-    id_dir = pathlib.Path.home() / ".workbuddy"
+    id_dir = cm.identity_dir
+    print(f"  · 身份目录解析：{id_dir}（来源：{cm.identity_source}）")
     for name in ("SOUL.md", "IDENTITY.md", "USER.md"):
         fp = id_dir / name
         if fp.exists():

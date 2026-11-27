@@ -56,7 +56,7 @@ python "<项目>\.workbuddy\context\k_lint.py" --ws "<项目>"
 
 | 现象 | 原因 / 处置 |
 |---|---|
-| `layout` 的 [A] 段是空的 | 身份三件套（`<宿主家目录>/.workbuddy/{SOUL,IDENTITY,USER}.md`）不存在 → **不是故障**，L0 未配置而已，降级为空继续用 |
+| `layout` 的 [A] 段是空的 | 先跑 `python context_manager.py identity` 看解析到哪个目录、来源是什么。默认按「环境变量 > 项目 `identity.json` > 家目录/工作区有限深度自动发现」找同时含 `SOUL.md`/`IDENTITY.md`/`USER.md` 的目录；仍找不到才降级为空并显式报出 |
 | 换机器 / 换用户后找不到状态 | 状态在**每项目**的 `.workbuddy/context/task_state.json` 里，不随技能走；搬项目请连同 `.workbuddy/` 一起搬，或用 `export` 生成可移植握手包 |
 | 没有 Python | 按 `SKILL.md`「任务层契约」节用文件工具手工维护 SSOT；**不要照 SKILL.md 重写引擎**——那必然产出分叉实现 |
 | 引擎版本不明 | 校验 `task_state.json` 的 `schema_version`（当前 `1.0`）；契约不兼容时以 SKILL.md 契约节为准升级 |

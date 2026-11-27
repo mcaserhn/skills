@@ -3,8 +3,9 @@
 """
 context_manager.py — 跨模型 / 跨时间统一上下文持久化（Phase 1 + Phase 2）
 
-底座：现有 WorkBuddy 记忆原语
-  - 身份层（稳定）：~/.workbuddy/{SOUL,IDENTITY,USER}.md  -> 只读输入
+底座：宿主无关的记忆原语
+  - 身份层（稳定）：自动发现含 SOUL/IDENTITY/USER.md 的目录 -> 只读输入
+    解析顺序：环境变量 > 项目 identity.json > 家目录及有限深度自动发现
   - 记忆层（跨会话事实）：<project>/.workbuddy/memory/MEMORY.md -> 只读输入
   - 日志层（日回滚）：<project>/.workbuddy/context/journal/YYYY-MM-DD.md -> 本模块写入
   - 任务层（SSOT，本设计新增）：<project>/.workbuddy/context/task_state.json -> 读写
@@ -38,6 +39,7 @@ context_manager.py — 跨模型 / 跨时间统一上下文持久化（Phase 1 +
   python context_manager.py open_question <问题>                 # 记待决问题（2026-10-13 补接线：原先仅有方法、无 CLI 分支）
   python context_manager.py flush [今日摘要]
   python context_manager.py show                               # 打印 task_state
+  python context_manager.py identity                           # 打印身份目录解析结果与来源
 可选：在任意子命令前加 --ws <项目路径> 指定工作区（默认当前目录）。
 """
 from __future__ import annotations
@@ -52,6 +54,24 @@ import re
 import tempfile
 
 SCHEMA_VERSION = "1.0"
+
+# 身份三件套的文件名固定，但所在目录不写死。
+# 任何能提供这三个文件的目录都可以作为身份层来源，不绑定具体 agent 宿主。
+IDENTITY_FILES = ("SOUL.md", "IDENTITY.md", "USER.md")
+
+# 自动发现时跳过的高噪声目录；只影响候选枚举，不影响显式配置。
+_SKIP_DIR_NAMES = {
+    ".git", ".cache", "node_modules", "AppData", "Library",
+    "blobs", "cache", "logs", "traces", "file-history", "artifact-index",
+}
+
+
+def _expand_user_path(value: str) -> pathlib.Path:
+    return pathlib.Path(os.path.expanduser(value)).expanduser()
+
+
+def _has_identity_files(d: pathlib.Path) -> bool:
+    return all((d / name).is_file() for name in IDENTITY_FILES)
 
 # 内置模型适配渲染器（Phase 2）。wrapper 中的 {handoff} 占位符会被握手摘要替换。
 # 新增模型 = 在 model_adapters.json 注册一条，不改任何代码。
@@ -91,13 +111,89 @@ class ContextManager:
     def __init__(self, workspace: str | os.PathLike):
         self.ws = pathlib.Path(workspace).resolve()
         self.wb = self.ws / ".workbuddy"
-        self.identity_dir = pathlib.Path(os.path.expanduser("~/.workbuddy"))
         self.context_dir = self.wb / "context"
         self.journal_dir = self.context_dir / "journal"
         self.memory_dir = self.wb / "memory"
         self.task_state_path = self.context_dir / "task_state.json"
         self.adapters_path = self.context_dir / "model_adapters.json"
         self.external_path = self.context_dir / "external.jsonl"
+        self.identity_dir, self.identity_source = self._resolve_identity_dir()
+
+    def _resolve_identity_dir(self) -> tuple[pathlib.Path, str]:
+        """解析身份三件套所在目录；不绑定任何具体 agent 宿主。
+
+        优先级：
+          1. 环境变量 CONTEXT_PERSISTENCE_IDENTITY_DIR / CONTEXT_IDENTITY_DIR
+          2. 环境变量 CONTEXT_PERSISTENCE_HOME / CONTEXT_HOME（其下直接含三件套）
+          3. 项目 .workbuddy/context/identity.json 的 identity_dir / home
+          4. 家目录、当前工作区，以及家目录下有限深度的子目录自动发现
+        命中判据是该目录同时存在 SOUL.md / IDENTITY.md / USER.md。
+        """
+        candidates: list[tuple[pathlib.Path, str]] = []
+        for var in ("CONTEXT_PERSISTENCE_IDENTITY_DIR", "CONTEXT_IDENTITY_DIR"):
+            value = os.environ.get(var)
+            if value:
+                candidates.append((_expand_user_path(value), f"env:{var}"))
+        for var in ("CONTEXT_PERSISTENCE_HOME", "CONTEXT_HOME"):
+            value = os.environ.get(var)
+            if value:
+                candidates.append((_expand_user_path(value), f"env-home:{var}"))
+
+        cfg = self.context_dir / "identity.json"
+        if cfg.exists():
+            data = self._read_json(cfg) or {}
+            for key, label in (
+                ("identity_dir", "project-config:identity_dir"),
+                ("home", "project-config:home"),
+            ):
+                value = data.get(key)
+                if isinstance(value, str) and value.strip():
+                    candidates.append((_expand_user_path(value.strip()), label))
+
+        home = pathlib.Path.home()
+        candidates.extend([
+            (home, "auto:home"),
+            (self.ws, "auto:workspace"),
+            (self.wb, "auto:workspace-.workbuddy"),
+        ])
+
+        seen: set[pathlib.Path] = set()
+        ordered: list[tuple[pathlib.Path, str]] = []
+        for path, label in candidates:
+            try:
+                key = path.resolve()
+            except OSError:
+                continue
+            if key in seen:
+                continue
+            seen.add(key)
+            ordered.append((path, label))
+
+        # 有限深度枚举家目录下的候选，不做无界递归。
+        for depth in range(3):
+            pattern = "/".join(["*"] * (depth + 1))
+            try:
+                found = sorted(home.glob(pattern))
+            except OSError:
+                break
+            for path in found:
+                try:
+                    key = path.resolve()
+                except OSError:
+                    continue
+                if not path.is_dir() or key in seen:
+                    continue
+                if any(part in _SKIP_DIR_NAMES for part in path.parts):
+                    continue
+                seen.add(key)
+                ordered.append((path, f"auto:home-depth{depth + 1}"))
+
+        for path, label in ordered:
+            if _has_identity_files(path):
+                return path, label
+
+        fallback = home / ".workbuddy"
+        return fallback, "none (identity files not found; fallback to ~/.workbuddy)"
 
     # ------------------------- 初始化 -------------------------
     def init(self) -> None:
@@ -213,7 +309,7 @@ class ContextManager:
 
     def _read_identity(self) -> dict:
         out = {}
-        for name in ("SOUL.md", "IDENTITY.md", "USER.md"):
+        for name in IDENTITY_FILES:
             fp = self.identity_dir / name
             if fp.exists():
                 out[name.replace(".md", "")] = self._read_text(fp)
@@ -773,6 +869,16 @@ def main(argv=None):
         text = cm.render_status_bar()
     elif argv[0] == "reference":
         text = cm.render_reference()
+    elif argv[0] == "identity":
+        found = cm._read_identity()
+        lines = [
+            f"identity_dir: {cm.identity_dir}",
+            f"source: {cm.identity_source}",
+        ]
+        for name in IDENTITY_FILES:
+            key = name.replace(".md", "")
+            lines.append(f"  {name}: {'yes' if found.get(key) else 'no'}")
+        text = "\n".join(lines)
     elif argv[0] == "wrap-external":
         src, rest = _flag(argv[1:], "--source")
         text = cm.wrap_external(" ".join(rest), src or "unknown")

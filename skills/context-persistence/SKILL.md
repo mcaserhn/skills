@@ -3,7 +3,7 @@ name: context-persistence
 description: 跨模型/跨时间统一上下文持久化，并按 KV Cache 友好布局注入。开场恢复背景/目标/进度，会话中记录决策与进度，结束写日志；任意模型切换或隔天复用都能续上。当用户在多个模型之间切换、隔天继续同一任务、或需要恢复「我们上次做到哪 / 为什么这样决策」时使用。触发词：上下文持久化、恢复上下文、隔天继续、换模型续上、context-persistence。
 description_zh: "跨模型/跨时间上下文持久化与 KV Cache 友好注入"
 description_en: "Cross-model, cross-session context persistence with KV-cache-friendly injection"
-version: "1.3.2"
+version: "1.3.3"
 license: MIT
 status: stable
 allowed-tools: Read,Write,Edit,Bash,Grep,Glob
@@ -21,7 +21,7 @@ display_name: "context-persistence"
 - 需要恢复「背景、目标、进度、关键决策」以保证输出连续一致。
 
 ## 底座（分层复用，不重复造）
-- 身份层（静态前缀，只读）：`<宿主家目录>/.workbuddy/{SOUL,IDENTITY,USER}.md`（WorkBuddy 家目录示例；不存在则 [A] 段降级为空）
+- 身份层（静态前缀，只读）：自动发现同时含 `SOUL.md` / `IDENTITY.md` / `USER.md` 的目录；不绑定具体 agent 宿主，解析顺序见「环境前置」
 - 记忆层（跨会话事实，只读）：`<project>/.workbuddy/memory/MEMORY.md`
 - 任务层（SSOT，读写）：`<project>/.workbuddy/context/task_state.json`
 - 日志层（日回滚，写）：`<project>/.workbuddy/context/journal/YYYY-MM-DD.md`
@@ -99,7 +99,12 @@ display_name: "context-persistence"
 
 **1. 装载位置**：本技能须位于**当前宿主自己的 user-level 技能目录**才会被会话加载（`<宿主家目录>/skills/context-persistence/`；家目录随宿主与用户而变，不要写死）。放在项目级 `.workbuddy/skills/` **不会被收录**（只作镜像备份）。多处都存在时，实际生效的是「**宿主自己的那个**」——改错副本等于没改；判断方法是看当前会话能看到的技能路径。
 
-**2. 身份与记忆层按家目录自适应**：引擎读 `<宿主家目录>/.workbuddy/{SOUL,IDENTITY,USER}.md` 作 [A] 段（**文件不存在则 [A] 降级为空、不报错**）；记忆层读 `<项目>/.workbuddy/memory/MEMORY.md`。不存在身份三件套不是故障，是「L0 未配置」。
+**2. 身份层与记忆层宿主无关**：引擎不写死任何 agent 家目录。身份三件套所在目录按以下顺序解析，命中判据是同时存在 `SOUL.md` / `IDENTITY.md` / `USER.md`：
+   1. 环境变量 `CONTEXT_PERSISTENCE_IDENTITY_DIR` 或 `CONTEXT_IDENTITY_DIR`；
+   2. 环境变量 `CONTEXT_PERSISTENCE_HOME` 或 `CONTEXT_HOME`（其下直接含三件套）；
+   3. 项目内 `<project>/.workbuddy/context/identity.json` 的 `identity_dir` 或 `home` 键；
+   4. 家目录、当前工作区，以及家目录下有限深度（3 层）子目录的自动发现。
+   用 `python context_manager.py identity` 查看解析结果与来源；若仍找不到三件套，`[A]` 才降级为空并显式报出，不静默吞掉。记忆层仍读 `<项目>/.workbuddy/memory/MEMORY.md`。
 
 **3. 引擎三分支（开场第一件事：判定本项目在哪一支）**：
 
@@ -143,6 +148,7 @@ display_name: "context-persistence"
 
 ## 版本沿革
 
+- **1.3.3**（2026-11-27）：身份层不再写死 `~/.workbuddy`。新增宿主无关解析：环境变量 > 项目 `identity.json` > 家目录/工作区有限深度自动发现；新增 `identity` 诊断命令；`measure_context.py` 改读同一解析结果。适配 WorkBuddy 海外版把身份文件放在 `~/.workbuddy-ai/user-<uuid>-personal/` 的场景，同时不绑定任何具体 agent。schema 与注入契约未变。
 - **1.3.2**（2026-10-29）：明确 GitHub 仓库为正文与引擎权威源；补充 SSOT 损坏/结构不符时 fail-closed 与显式 STOP 检查点，并说明同目录临时文件 + 原子替换写入。未改 schema 与命令行为。
 - **1.3.1**（2026-10-20）：文档漂移修补，无行为变化。补两条底层命令说明（`show` / `wrap-external`）——命令清单与引擎逐条对账发现引擎 20 个顶层命令、文档原只覆盖 18 个；身份路径统一为 `<宿主家目录>/.workbuddy/…`。
 - **1.3.0**（2026-10-20）：修可移植性。此前新环境装到的只是「壳」——命令全部依赖每项目引擎，而技能对引擎来源缺乏可执行指引，新环境只能猜结构重建。本版把「环境前置」重写为**引擎三分支**（有引擎→用 / 拿得到→**部署不重建** / 拿不到→按契约手工兜底）；新增「**任务层契约**」节，把 `task_state.json` 字段全貌、条目结构、flush 物理动作、文件格式内嵌进技能，兜底从「猜」变「照抄」；兜底条款扩为两级并明确**严禁照说明书重写引擎**；权限链表述改为不依赖特定机器路径的角色判定。注入契约 / 体量边界 / 记忆层规则 / 三个动作 / 外部通道等机制条款一字未动。
