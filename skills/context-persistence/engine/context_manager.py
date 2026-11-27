@@ -192,8 +192,8 @@ class ContextManager:
             if _has_identity_files(path):
                 return path, label
 
-        fallback = home / ".workbuddy"
-        return fallback, "none (identity files not found; fallback to ~/.workbuddy)"
+        fallback = home
+        return fallback, "none (identity files not found; no identity directory resolved)"
 
     # ------------------------- 初始化 -------------------------
     def init(self) -> None:
